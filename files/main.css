@@ -14,7 +14,7 @@
 	--border-style: 1px solid #E8E8E8;
 	--header-height: 48px;
 	--panel-width: 300px;
-	--panel-collapsed-width: 52px;
+	--panel-collapsed-width: 56px;
 	--panel-padding: 16px;
 	--icon-size: 20px;
 }
@@ -109,6 +109,8 @@ h1 a {
 	height: var(--header-height);
 	border-bottom: var(--border-style);
 	align-items: center;
+	min-width: 0;
+	flex-shrink: 0;
 }
 #header h1 {
 	padding-left: var(--panel-padding);
@@ -398,6 +400,7 @@ iframe#viewer {
 	width: 36px;
 	height: 36px;
 	min-width: 36px;
+	flex-shrink: 0;
 	margin-left: auto;
 	margin-right: 8px;
 	cursor: pointer;
@@ -418,7 +421,8 @@ iframe#viewer {
 }
 #panel.collapsed #panelToggle {
 	transform: rotate(90deg);
-	margin-right: 6px;
+	margin-right: 8px;
+	flex-shrink: 0;
 }
 
 /* Collapsed strip - narrow sidebar with category pills */
@@ -441,7 +445,8 @@ iframe#viewer {
 }
 #panel.collapsed #header {
 	justify-content: flex-end;
-	padding: 0 4px;
+	padding: 0 6px;
+	min-width: 0;
 }
 #panel.collapsed {
 	width: var(--panel-collapsed-width);
@@ -537,6 +542,7 @@ iframe#viewer {
 	width: 36px;
 	height: 36px;
 	min-width: 36px;
+	flex-shrink: 0;
 	margin-right: 4px;
 	cursor: pointer;
 	background-color: var(--text-color);
@@ -807,6 +813,22 @@ iframe#viewer {
 	}
 }
 
+/* Compact header on small-to-medium screens to reduce crowding */
+@media all and ( max-width: 768px ) and ( min-width: 641px ) {
+	#panel:not(.collapsed) #header h1 {
+		padding-left: 12px;
+		font-size: 16px;
+	}
+	#panel:not(.collapsed) #sections * {
+		padding: 0 10px;
+	}
+	#panel:not(.collapsed) #panelToggle {
+		margin-right: 6px;
+	}
+	#panel:not(.collapsed) #settingsButton {
+		margin-right: 2px;
+	}
+}
 
 .card {
 	border-radius: 3px;
@@ -867,6 +889,20 @@ iframe#viewer {
 
 	#panel #panelToggle {
 		display: flex !important;
+		margin-right: 6px;
+	}
+	#panel #settingsButton {
+		margin-right: 2px;
+	}
+	#panel #header h1 {
+		padding-left: 12px;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	#panel #sections * {
+		padding: 0 8px;
 	}
 	#panel.collapsed #collapsedStrip {
 		display: none !important;
