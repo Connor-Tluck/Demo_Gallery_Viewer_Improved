@@ -393,14 +393,13 @@ h1 a {
 
 #viewerWrapper {
 	position: absolute;
-	left: 0;
+	left: var(--panel-width);
 	right: 0;
 	top: 0;
 	bottom: 0;
-	width: 100%;
-	height: 100%;
 	overflow: auto;
 	-webkit-overflow-scrolling: touch;
+	transition: left 0.25s ease;
 }
 
 #viewer,
@@ -409,6 +408,8 @@ iframe {
 	border: 0px;
 	left: 0;
 	right: 0;
+	top: 0;
+	bottom: 0;
 	width: 100%;
 	height: 100%;
 	overflow: auto;
@@ -416,11 +417,6 @@ iframe {
 
 iframe#viewer {
 	display: none; /* Workaround: The iframe has white background in Chrome for some reason */
-}
-
-#viewerWrapper {
-	padding-left: var(--panel-width);
-	transition: padding-left 0.25s ease;
 }
 
 #viewer {
@@ -486,7 +482,7 @@ iframe#viewer {
 	transition: width 0.25s ease, min-width 0.25s ease;
 }
 #panel.collapsed ~ #viewerWrapper {
-	padding-left: var(--panel-collapsed-width);
+	left: var(--panel-collapsed-width);
 }
 
 .collapsed-pill {
@@ -531,8 +527,8 @@ iframe#viewer {
 #collapsedFlyout.open {
 	display: flex;
 }
-#panel.collapsed:has(#collapsedFlyout.open) ~ #viewer {
-	padding-left: calc(var(--panel-collapsed-width) + 260px);
+#panel.collapsed:has(#collapsedFlyout.open) ~ #viewerWrapper {
+	left: calc(var(--panel-collapsed-width) + 260px);
 }
 
 #collapsedFlyoutTitle {

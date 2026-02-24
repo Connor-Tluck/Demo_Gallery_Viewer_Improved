@@ -238,8 +238,11 @@
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
       }
-      /* Compact mode when embedded in gallery iframe */
+      /* Compact mode when embedded in gallery iframe - prevent sidebar cutoff */
+      body.embedded { overflow-x: auto; overflow-y: auto; min-height: 100%; width: 100%; box-sizing: border-box; }
+      body.embedded .container, body.embedded .container-fluid { max-width: 100% !important; padding-left: 1rem; padding-right: 1rem; }
       body.embedded .container header { padding: 0.5rem 0 !important; margin-bottom: 0.5rem !important; }
+      body.embedded header .nav { flex-wrap: wrap !important; }
       body.embedded header img { width: 100px !important; height: 29px !important; }
       body.embedded .h-100.p-5.bg-light { padding: 0.75rem 1rem !important; margin-bottom: 0.5rem !important; }
       body.embedded .display-5 { font-size: 1.25rem !important; }
@@ -249,9 +252,10 @@
       body.embedded .list-group-item .small { display: none; }
       body.embedded footer { margin-top: 1rem !important; padding-top: 1rem !important; font-size: 0.8rem; }
       body.embedded .py-3 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+      body.embedded .row { margin-left: -0.5rem; margin-right: -0.5rem; }
+      body.embedded .row > * { padding-left: 0.5rem; padding-right: 0.5rem; }
       /* Mobile scroll fix when embedded in gallery iframe - enables touch scrolling on iOS */
       html, body { -webkit-overflow-scrolling: touch; }
-      body.embedded { overflow-x: hidden; overflow-y: auto; min-height: 100%; }
 
     </style>
 
