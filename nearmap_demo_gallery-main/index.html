@@ -8,13 +8,15 @@
       content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
     <link
-      rel="shortcut icon"
-      href="examples/files/favicon_white.ico"
+      rel="icon"
+      href="files/favicon_white.svg"
+      type="image/svg+xml"
       media="(prefers-color-scheme: dark)"
     />
     <link
-      rel="shortcut icon"
-      href="examples/files/favicon.ico"
+      rel="icon"
+      href="files/favicon.svg"
+      type="image/svg+xml"
       media="(prefers-color-scheme: light)"
     />
     <link rel="stylesheet" type="text/css" href="files/main.css" />
@@ -67,6 +69,7 @@
           <span class="selected">examples</span>
         </div>
 
+        <div id="settingsButton" data-tooltip="Settings"></div>
         <div id="panelToggle" data-tooltip="Expand sidebar"></div>
       </div>
 
@@ -102,6 +105,26 @@
           />
         </div>
       </div>
+
+      <div id="settingsPanel">
+        <div id="settingsPanelHeader">
+          <h3>Settings</h3>
+          <div id="settingsCloseButton"></div>
+        </div>
+        <div id="settingsPanelContent">
+          <div class="settings-group">
+            <label class="settings-toggle">
+              <input type="checkbox" id="settingSearchBar" checked />
+              <span class="settings-toggle-slider"></span>
+              <span class="settings-toggle-label">Search bar</span>
+            </label>
+          </div>
+          <div class="settings-group">
+            <div class="settings-group-title">Categories in sidebar</div>
+            <div id="settingsCategoryToggles"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <iframe
@@ -123,6 +146,12 @@
       const filterInput = document.getElementById("filterInput");
       const exitSearchButton = document.getElementById("exitSearchButton");
       const panelToggle = document.getElementById("panelToggle");
+      const settingsButton = document.getElementById("settingsButton");
+      const settingsPanel = document.getElementById("settingsPanel");
+      const settingsCloseButton = document.getElementById("settingsCloseButton");
+      const settingSearchBar = document.getElementById("settingSearchBar");
+      const settingsCategoryToggles = document.getElementById("settingsCategoryToggles");
+      const inputWrapper = document.getElementById("inputWrapper");
       const collapsedStrip = document.getElementById("collapsedStrip");
       const collapsedCategories = document.getElementById("collapsedCategories");
       const collapsedFlyout = document.getElementById("collapsedFlyout");
@@ -152,7 +181,94 @@
         "Engineering Design": "Engineering"
       };
 
+      const SETTINGS_KEY = "gallerySettings";
+      const DEFAULT_SETTINGS = {
+        searchBar: true,
+        categories: {} // populated per-category, true = visible
+      };
+
       let selected = null;
+
+      function getSettings() {
+        try {
+          const stored = localStorage.getItem(SETTINGS_KEY);
+          if (stored) {
+            return JSON.parse(stored);
+          }
+        } catch (e) {}
+        return null;
+      }
+
+      function getCategorySettings(files) {
+        const s = getSettings();
+        const cats = s && s.categories ? s.categories : {};
+        const out = {};
+        for (const key in files) {
+          out[key] = cats[key] !== false; // default true
+        }
+        return out;
+      }
+
+      function saveSettings(settings) {
+        try {
+          localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+        } catch (e) {}
+      }
+
+      function buildSettingsCategoryToggles(files) {
+        const categorySettings = getCategorySettings(files);
+        settingsCategoryToggles.innerHTML = "";
+        for (const key in files) {
+          const label = document.createElement("label");
+          label.className = "settings-category-toggle";
+          const cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.checked = categorySettings[key] !== false;
+          cb.setAttribute("data-category", key);
+          const slider = document.createElement("span");
+          slider.className = "settings-toggle-slider";
+          const text = document.createElement("span");
+          text.className = "settings-toggle-label";
+          text.textContent = categoryShortNames[key] || key;
+          label.appendChild(cb);
+          label.appendChild(slider);
+          label.appendChild(text);
+          cb.addEventListener("change", function () {
+            const s = getSettings() || { searchBar: true, categories: {} };
+            s.categories = s.categories || {};
+            s.categories[key] = cb.checked;
+            saveSettings(s);
+            applySettings(files);
+          });
+          settingsCategoryToggles.appendChild(label);
+        }
+      }
+
+      function applySettings(files) {
+        const s = getSettings();
+        const searchBarOn = !s ? true : s.searchBar !== false;
+        const categorySettings = getCategorySettings(files);
+
+        inputWrapper.style.display = searchBarOn ? "" : "none";
+        settingSearchBar.checked = searchBarOn;
+
+        const headers = container.querySelectorAll("h2[data-category]");
+        headers.forEach(function (h2) {
+          const cat = h2.getAttribute("data-category");
+          const visible = categorySettings[cat] !== false;
+          h2.classList.toggle("settings-hidden", !visible);
+          let el = h2.nextElementSibling;
+          while (el && el.tagName !== "H2") {
+            el.classList.toggle("settings-hidden", !visible);
+            el = el.nextElementSibling;
+          }
+        });
+
+        document.querySelectorAll(".collapsed-pill").forEach(function (pill) {
+          const cat = pill.getAttribute("data-category");
+          pill.style.display = categorySettings[cat] !== false ? "" : "none";
+        });
+      }
 
       function showHome() {
         selected = null;
@@ -212,6 +328,9 @@
             validRedirects.set(file, file + ".html");
           }
         }
+
+        buildSettingsCategoryToggles(files);
+        applySettings(files);
 
         if (window.location.hash !== "") {
           const file = window.location.hash.substring(1);
@@ -369,6 +488,22 @@
           event.preventDefault();
           panel.classList.toggle("open");
         };
+
+        settingsButton.addEventListener("click", function (e) {
+          e.preventDefault();
+          if (window.hideGalleryTooltip) window.hideGalleryTooltip();
+          settingsPanel.classList.add("open");
+        });
+        settingsCloseButton.addEventListener("click", function (e) {
+          e.preventDefault();
+          settingsPanel.classList.remove("open");
+        });
+        settingSearchBar.addEventListener("change", function () {
+          const s = getSettings() || { searchBar: true, categories: {} };
+          s.searchBar = settingSearchBar.checked;
+          saveSettings(s);
+          applySettings(files);
+        });
 
         if (localStorage.getItem("panelCollapsed") === "true") {
           panel.classList.add("collapsed");

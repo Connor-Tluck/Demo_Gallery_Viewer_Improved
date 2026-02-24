@@ -6,7 +6,7 @@ const assets = [
 	'./manifest.json',
 	'./images/icon.png',
 
-	'../files/favicon.ico',
+	'../files/favicon.svg',
 
 	'../build/three.module.js',
 

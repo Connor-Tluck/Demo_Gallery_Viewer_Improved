@@ -330,6 +330,10 @@ h1 a {
 			display: none !important;
 		}
 
+		#panel #content .settings-hidden {
+			display: none !important;
+		}
+
 		#panel #content #previewsToggler {
 			cursor: pointer;
 			float: right;
@@ -526,6 +530,177 @@ iframe#viewer {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+}
+
+/* Settings button - gear icon */
+#panel #settingsButton {
+	width: 36px;
+	height: 36px;
+	min-width: 36px;
+	margin-right: 4px;
+	cursor: pointer;
+	background-color: var(--text-color);
+	-webkit-mask-image: url(../files/ic_settings_black_24dp.svg);
+	-webkit-mask-size: 20px;
+	-webkit-mask-position: 50% 50%;
+	-webkit-mask-repeat: no-repeat;
+	mask-image: url(../files/ic_settings_black_24dp.svg);
+	mask-size: 20px;
+	mask-position: 50% 50%;
+	mask-repeat: no-repeat;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background-color 0.15s;
+}
+#panel #settingsButton:hover {
+	background-color: var(--color-blue);
+}
+#panel.collapsed #settingsButton {
+	display: none;
+}
+
+/* Settings panel - slide-out overlay */
+#settingsPanel {
+	display: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: var(--background-color);
+	z-index: 1000;
+	flex-direction: column;
+	overflow: hidden;
+}
+#settingsPanel.open {
+	display: flex;
+}
+#settingsPanelHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px var(--panel-padding);
+	border-bottom: var(--border-style);
+	background: var(--secondary-background-color);
+}
+#settingsPanelHeader h3 {
+	margin: 0;
+	font-size: calc(var(--font-size) + 1px);
+	font-weight: 700;
+	color: var(--color-blue);
+}
+#settingsCloseButton {
+	width: 36px;
+	height: 36px;
+	min-width: 36px;
+	cursor: pointer;
+	background-color: var(--text-color);
+	-webkit-mask-image: url(../files/ic_close_black_24dp.svg);
+	-webkit-mask-size: 20px;
+	-webkit-mask-position: 50% 50%;
+	-webkit-mask-repeat: no-repeat;
+	mask-image: url(../files/ic_close_black_24dp.svg);
+	mask-size: 20px;
+	mask-position: 50% 50%;
+	mask-repeat: no-repeat;
+}
+#settingsCloseButton:hover {
+	background-color: var(--color-blue);
+}
+#settingsPanelContent {
+	flex: 1;
+	overflow-y: auto;
+	padding: var(--panel-padding);
+}
+.settings-group {
+	margin-bottom: 24px;
+}
+.settings-group-title {
+	font-size: calc(var(--font-size) - 1px);
+	font-weight: 600;
+	color: var(--secondary-text-color);
+	margin-bottom: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+.settings-toggle {
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	margin-bottom: 12px;
+	user-select: none;
+}
+.settings-toggle input {
+	position: absolute;
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+.settings-toggle-slider {
+	width: 36px;
+	height: 20px;
+	background: var(--secondary-background-color);
+	border-radius: 20px;
+	position: relative;
+	flex-shrink: 0;
+	margin-right: 12px;
+	border: var(--border-style);
+	transition: background 0.2s;
+}
+.settings-toggle-slider::before {
+	content: "";
+	position: absolute;
+	width: 16px;
+	height: 16px;
+	left: 2px;
+	top: 0;
+	bottom: 0;
+	margin: auto 0;
+	background: var(--text-color);
+	border-radius: 50%;
+	transition: transform 0.2s;
+}
+.settings-toggle input:checked + .settings-toggle-slider {
+	background: var(--color-blue);
+	border-color: var(--color-blue);
+}
+.settings-toggle input:checked + .settings-toggle-slider::before {
+	transform: translateX(16px);
+	background: var(--background-color);
+}
+.settings-toggle-label {
+	font-size: 1rem;
+	color: var(--text-color);
+}
+.settings-category-toggle {
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	margin-bottom: 10px;
+	user-select: none;
+}
+.settings-category-toggle input {
+	position: absolute;
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+.settings-category-toggle .settings-toggle-slider {
+	width: 32px;
+	height: 18px;
+}
+.settings-category-toggle .settings-toggle-slider::before {
+	width: 14px;
+	height: 14px;
+}
+.settings-category-toggle input:checked + .settings-toggle-slider {
+	background: var(--color-blue);
+	border-color: var(--color-blue);
+}
+.settings-category-toggle input:checked + .settings-toggle-slider::before {
+	transform: translateX(14px);
+	background: var(--background-color);
 }
 
 #button {
