@@ -249,6 +249,9 @@
       body.embedded .list-group-item .small { display: none; }
       body.embedded footer { margin-top: 1rem !important; padding-top: 1rem !important; font-size: 0.8rem; }
       body.embedded .py-3 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+      /* Mobile scroll fix when embedded in gallery iframe - enables touch scrolling on iOS */
+      html, body { -webkit-overflow-scrolling: touch; }
+      body.embedded { overflow-x: hidden; overflow-y: auto; min-height: 100%; }
 
     </style>
 
@@ -312,14 +315,8 @@
   
 
   </div>
-      <script src="./tx_api_web_app/assets/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="./tx_api_web_app/form-validation.js"></script>
-    </body>
-  </html>
-  
 
-
-  
+  <div class="container">
       <div class="row align-items-md-stretch">
         <div class="col-md-6">
         <div class="h-100 p-5 bg-light border rounded-3">
@@ -456,9 +453,8 @@
         <button class="w-80 btn btn-primary btn-lg" id="key_test_button" type="submit">Key_Test</button>
     </div> -->
   </form>
-    
-  
-
+    </div>
+  </div>
 
     <footer class="my-5 pt-5 text-muted text-center text-small">
         <p class="mb-1">&copy; 2017–2022 Nearmap PTY Ltd.</p>
@@ -469,6 +465,8 @@
         </ul>
     </footer>
 
-
-
-
+  </main>
+  <script src="./tx_api_web_app/assets/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="./tx_api_web_app/form-validation.js"></script>
+</body>
+</html>

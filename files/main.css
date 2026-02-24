@@ -375,6 +375,18 @@ h1 a {
 	padding-right: 2px;
 }
 
+#viewerWrapper {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
 #viewer,
 iframe {
 	position: absolute;
@@ -390,9 +402,13 @@ iframe#viewer {
 	display: none; /* Workaround: The iframe has white background in Chrome for some reason */
 }
 
-#viewer {
+#viewerWrapper {
 	padding-left: var(--panel-width);
 	transition: padding-left 0.25s ease;
+}
+
+#viewer {
+	padding-left: 0;
 }
 
 /* Collapsible sidebar - single toggle, consistent position */
@@ -453,7 +469,7 @@ iframe#viewer {
 	min-width: var(--panel-collapsed-width);
 	transition: width 0.25s ease, min-width 0.25s ease;
 }
-#panel.collapsed ~ #viewer {
+#panel.collapsed ~ #viewerWrapper {
 	padding-left: var(--panel-collapsed-width);
 }
 
@@ -961,7 +977,7 @@ iframe#viewer {
 		width: 100%;
 		right: 0;
 		z-index: 1000;
-		overflow-x: hidden;
+		overflow: hidden;
 		transition: 0s 0s height;
 		border: none;
 		height: var(--header-height);
@@ -1007,17 +1023,27 @@ iframe#viewer {
 	#panel.open #contentWrapper {
 		display: none !important;
 	}
-	#viewer,
-	iframe {
+	#viewerWrapper {
 		left: 0;
 		top: var(--header-height);
 		width: 100%;
 		height: calc(100% - var(--header-height));
+		padding-left: 0;
+		overflow-y: scroll;
+		overflow-x: hidden;
+		-webkit-overflow-scrolling: touch;
+		touch-action: pan-y;
+		overscroll-behavior-y: contain;
+	}
+	#viewer,
+	iframe {
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
 	}
 	#viewer {
 		padding-left: 0;
-		-webkit-overflow-scrolling: touch;
-		touch-action: pan-y;
 	}
 
 	#collapsedFlyout.open {

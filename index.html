@@ -5,7 +5,7 @@
     <title>Nearmap Demo</title>
     <meta
       name="viewport"
-      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
     <link
       rel="icon"
@@ -131,11 +131,13 @@
       </div>
     </div>
 
-    <iframe
-      id="viewer"
-      name="viewer"
-      allow="fullscreen; xr-spatial-tracking;"
-    ></iframe>
+    <div id="viewerWrapper">
+      <iframe
+        id="viewer"
+        name="viewer"
+        allow="fullscreen; xr-spatial-tracking;"
+      ></iframe>
+    </div>
 
     <a id="button" target="_blank"
       ><img src="files/ic_code_black_24dp.svg"
@@ -549,14 +551,12 @@
           content.classList.toggle("minimal");
         };
 
-        // iOS iframe auto-resize workaround (only for example pages; home page needs scroll)
-
+        // iOS iframe auto-resize workaround: set explicit pixel dimensions to prevent
+        // iframe from auto-expanding to content height (which breaks layout).
+        // Do NOT set scrolling="no" - that prevents users from scrolling example pages on mobile.
         if (isIOS) {
           viewer.style.width = getComputedStyle(viewer).width;
           viewer.style.height = getComputedStyle(viewer).height;
-          if (!document.body.classList.contains("home")) {
-            viewer.setAttribute("scrolling", "no");
-          }
         }
 
         // Fast tooltip (150ms delay vs ~1s for native title)
@@ -691,7 +691,8 @@
         window.location.hash = file;
         viewer.focus();
         viewer.style.display = "unset";
-        if (isIOS) viewer.setAttribute("scrolling", "no");
+        // Allow iframe to scroll - scrolling="no" was blocking scroll on mobile
+        if (isIOS) viewer.removeAttribute("scrolling");
 
         panel.classList.remove("open");
 
