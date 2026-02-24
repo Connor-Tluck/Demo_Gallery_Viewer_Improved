@@ -1059,6 +1059,7 @@ iframe#viewer {
 	}
 	#viewerWrapper {
 		left: 0;
+		right: 0;
 		top: var(--header-height);
 		width: 100%;
 		height: calc(100% - var(--header-height));
@@ -1068,6 +1069,10 @@ iframe#viewer {
 		-webkit-overflow-scrolling: touch;
 		touch-action: pan-y;
 		overscroll-behavior-y: contain;
+		transition: right 0.25s ease;
+	}
+	#panel.open ~ #viewerWrapper {
+		right: var(--panel-collapsed-width);
 	}
 	#viewer,
 	iframe {
