@@ -924,9 +924,19 @@ iframe#viewer {
 	line-height: calc(var(--line-height) - 6px);
 }
 
-/* mobile */
+/* ============================================================
+   MOBILE (max-width: 640px)
+   Layout: header bar at top; viewer full-width below; sidebar
+   opens as overlay strip on right. Desktop rules (e.g.
+   #panel.collapsed ~ #viewerWrapper) must be overridden here
+   with equal/higher specificity to prevent layout leaks.
+   ============================================================ */
 
 @media all and ( max-width: 640px ) {
+
+	.settings-desktop-only {
+		display: none !important;
+	}
 
 	:root {
 		--header-height: 56px;
@@ -1028,6 +1038,8 @@ iframe#viewer {
 	#panel.open {
 		height: 100%;
 		transition: 0s 0s height;
+		/* Transparent so viewer shows through; header and strip have own backgrounds */
+		background: transparent;
 	}
 
 	#panelScrim {
@@ -1065,7 +1077,10 @@ iframe#viewer {
 	#panel.open #contentWrapper {
 		display: none !important;
 	}
-	#viewerWrapper {
+	/* Mobile: viewer always starts at left:0 (override desktop collapsed rule) */
+	#viewerWrapper,
+	#panel.collapsed ~ #viewerWrapper,
+	#panel.open ~ #viewerWrapper {
 		left: 0;
 		right: 0;
 		top: var(--header-height);
@@ -1079,8 +1094,15 @@ iframe#viewer {
 		overscroll-behavior-y: contain;
 		transition: right 0.25s ease;
 	}
+	/* Sidebar open: reserve right 56px for strip, content stays visible */
 	#panel.open ~ #viewerWrapper {
 		right: var(--panel-collapsed-width);
+		left: 0;
+	}
+	/* Flyout open: reserve right 316px (strip + flyout), keep left: 0 */
+	#panel.collapsed:has(#collapsedFlyout.open) ~ #viewerWrapper {
+		left: 0;
+		right: calc(var(--panel-collapsed-width) + 260px);
 	}
 	#viewer,
 	iframe {
