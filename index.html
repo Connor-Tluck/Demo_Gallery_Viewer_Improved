@@ -154,6 +154,7 @@
           />
           <div id="exitSearchButton"></div>
         </div>
+        <div id="filterCount"></div>
 
         <div id="content">
           <img
@@ -830,15 +831,28 @@
 
         const exp = new RegExp(escapeRegExp(v), "gi");
 
+        let total = 0;
+        let visible = 0;
+
         for (const key in files) {
           const section = files[key];
 
           for (let i = 0; i < section.length; i++) {
-            filterExample(section[i], exp, tags);
+            total++;
+            if (filterExample(section[i], exp, tags)) visible++;
           }
         }
 
         layoutList(files);
+
+        const filterCount = document.getElementById("filterCount");
+        if (v !== "") {
+          filterCount.textContent = "Showing " + visible + " of " + total + " examples";
+          filterCount.classList.add("visible");
+        } else {
+          filterCount.textContent = "";
+          filterCount.classList.remove("visible");
+        }
 
         updateLink(v);
       }
@@ -859,12 +873,13 @@
         const name = getName(file);
         if (file in tags) file += " " + tags[file].join(" ");
         const res = file.match(exp);
-        let text;
 
         if (res && res.length > 0) {
           link.classList.remove("hidden");
+          return true;
         } else {
           link.classList.add("hidden");
+          return false;
         }
       }
 

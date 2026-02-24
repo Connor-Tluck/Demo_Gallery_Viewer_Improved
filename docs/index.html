@@ -37,8 +37,9 @@
 						<option value="zh">中文</option>
 						<option value="ja">日本語</option>
 					</select>
-				</div>
-				<div id="content"></div>
+			</div>
+			<div id="filterCount"></div>
+			<div id="content"></div>
 			</div>
 
 		</div>
@@ -356,53 +357,63 @@
 
 		}
 
-		function updateFilter() {
+	function updateFilter() {
 
-			let v = filterInput.value.trim();
-			v = v.replace( /\s+/gi, ' ' ); // replace multiple whitespaces with a single one
+		let v = filterInput.value.trim();
+		v = v.replace( /\s+/gi, ' ' ); // replace multiple whitespaces with a single one
 
-			if ( v !== '' ) {
+		if ( v !== '' ) {
 
-				window.history.replaceState( {}, '', '?q=' + v + window.location.hash );
+			window.history.replaceState( {}, '', '?q=' + v + window.location.hash );
+
+		} else {
+
+			window.history.replaceState( {}, '', window.location.pathname + window.location.hash );
+
+		}
+
+		const regExp = new RegExp( escapeRegExp( v ), 'gi' );
+
+		let total = 0;
+		let visible = 0;
+
+		for ( let pageName in pageProperties ) {
+
+			total++;
+			const linkElement = pageProperties[ pageName ].linkElement;
+			const categoryClassList = linkElement.parentElement.classList;
+			const filterResults = pageName.match( regExp );
+
+			if ( filterResults !== null && filterResults.length > 0 ) {
+
+				visible++;
+				pageName = pageName.replaceAll( regExp, '<b>$&</b>' );
+
+				categoryClassList.remove( 'hidden' );
+				linkElement.innerHTML = pageName;
 
 			} else {
 
-				window.history.replaceState( {}, '', window.location.pathname + window.location.hash );
+				categoryClassList.add( 'hidden' );
 
 			}
-
-			//
-
-			const regExp = new RegExp( escapeRegExp( v ), 'gi' );
-
-			for ( let pageName in pageProperties ) {
-
-				const linkElement = pageProperties[ pageName ].linkElement;
-				const categoryClassList = linkElement.parentElement.classList;
-				const filterResults = pageName.match( regExp );
-
-				if ( filterResults !== null && filterResults.length > 0 ) {
-
-					pageName = pageName.replaceAll( regExp, '<b>$&</b>' );
-
-					categoryClassList.remove( 'hidden' );
-					linkElement.innerHTML = pageName;
-
-				} else {
-
-					// Hide all non-matching page names
-
-					categoryClassList.add( 'hidden' );
-
-				}
-
-			}
-
-			displayFilteredPanel();
-
-			updateLink( v );
 
 		}
+
+		displayFilteredPanel();
+
+		const filterCount = document.getElementById( 'filterCount' );
+		if ( v !== '' ) {
+			filterCount.textContent = 'Showing ' + visible + ' of ' + total + ' docs';
+			filterCount.classList.add( 'visible' );
+		} else {
+			filterCount.textContent = '';
+			filterCount.classList.remove( 'visible' );
+		}
+
+		updateLink( v );
+
+	}
 
 		function updateLink( search ) {
 

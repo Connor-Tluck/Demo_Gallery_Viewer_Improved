@@ -24,9 +24,10 @@
 			<div id="contentWrapper">
 				<div id="inputWrapper">
 					<input placeholder="Search examples..." type="text" id="filterInput" autocorrect="off" autocapitalize="off" spellcheck="false" />
-					<div id="exitSearchButton"></div>
-				</div>
-				<div id="content">
+				<div id="exitSearchButton"></div>
+			</div>
+			<div id="filterCount"></div>
+			<div id="content">
 					<img id="previewsToggler" src="./files/thumbnails.svg" width="20" height="20" />
 				</div>
 			</div>
@@ -164,24 +165,35 @@
 		function escapeRegExp( string ) {
 			return string.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' ); // https://stackoverflow.com/a/6969486/5250847
 		}
-		function updateFilter( files, tags ) {
-			let v = filterInput.value.trim();
-			v = v.replace( /\s+/gi, ' ' ); // replace multiple whitespaces with a single one
-			if ( v !== '' ) {
-				window.history.replaceState( {}, '', '?q=' + v + window.location.hash );
-			} else {
-				window.history.replaceState( {}, '', window.location.pathname + window.location.hash );
-			}
-			const exp = new RegExp( escapeRegExp( v ), 'gi' );
-			for ( const key in files ) {
-				const section = files[ key ];
-				for ( let i = 0; i < section.length; i ++ ) {
-					filterExample( section[ i ], exp, tags );
-				}
-			}
-			layoutList( files );
-			updateLink( v );
+	function updateFilter( files, tags ) {
+		let v = filterInput.value.trim();
+		v = v.replace( /\s+/gi, ' ' ); // replace multiple whitespaces with a single one
+		if ( v !== '' ) {
+			window.history.replaceState( {}, '', '?q=' + v + window.location.hash );
+		} else {
+			window.history.replaceState( {}, '', window.location.pathname + window.location.hash );
 		}
+		const exp = new RegExp( escapeRegExp( v ), 'gi' );
+		let total = 0;
+		let visible = 0;
+		for ( const key in files ) {
+			const section = files[ key ];
+			for ( let i = 0; i < section.length; i ++ ) {
+				total++;
+				if ( filterExample( section[ i ], exp, tags ) ) visible++;
+			}
+		}
+		layoutList( files );
+		const filterCount = document.getElementById( 'filterCount' );
+		if ( v !== '' ) {
+			filterCount.textContent = 'Showing ' + visible + ' of ' + total + ' examples';
+			filterCount.classList.add( 'visible' );
+		} else {
+			filterCount.textContent = '';
+			filterCount.classList.remove( 'visible' );
+		}
+		updateLink( v );
+	}
 		function updateLink( search ) {
 			// update docs link
 			if ( search ) {
@@ -191,16 +203,18 @@
 				sectionLink.href = sectionDefaultHref;
 			}
 		}
-		function filterExample( file, exp, tags ) {
-			const link = links[ file ];
-			if ( file in tags ) file += ' ' + tags[ file ].join( ' ' );
-			const res = file.replace( /_+/g, ' ' ).match( exp );
-			if ( res && res.length > 0 ) {
-				link.classList.remove( 'hidden' );
-			} else {
-				link.classList.add( 'hidden' );
-			}
+	function filterExample( file, exp, tags ) {
+		const link = links[ file ];
+		if ( file in tags ) file += ' ' + tags[ file ].join( ' ' );
+		const res = file.replace( /_+/g, ' ' ).match( exp );
+		if ( res && res.length > 0 ) {
+			link.classList.remove( 'hidden' );
+			return true;
+		} else {
+			link.classList.add( 'hidden' );
+			return false;
 		}
+	}
 		function getName( file ) {
 			if ( displayNames[ file ] ) return displayNames[ file ];
 			const parts = file.split( '_' );

@@ -1,5 +1,22 @@
 {
 
+  "3D Mesh": [
+    "obj_gltf_mesh_1",
+    "obj_gltf_mesh_2",
+    "obj_gltf_mesh_3",
+    "obj_gltf_mesh_4",
+    "obj_gltf_mesh_5",
+    "obj_gltf_mesh_6",
+    "obj_gltf_mesh_7",
+    "obj_gltf_mesh_8",
+    "obj_gltf_mesh_9",
+    "obj_gltf_mesh_10",
+    "obj_gltf_mesh_11",
+    "obj_gltf_mesh_12",
+    "obj_mesh_hartford",
+    "obj_mesh_liberty",
+    "obj_mesh_sofi"
+  ],
 
   "ESRI": [
     "nearmap_arcgis_vector_AI_Colorado_Sample",
@@ -73,25 +90,6 @@
     "nearmap_google_maps_tile_integration"
   ],
   
-  "3D Mesh": [
-    "obj_gltf_mesh_1",
-    "obj_gltf_mesh_2",
-    "obj_gltf_mesh_3",
-    "obj_gltf_mesh_4",
-    "obj_gltf_mesh_5",
-    "obj_gltf_mesh_6",
-    "obj_gltf_mesh_7",
-    "obj_gltf_mesh_8",
-    "obj_gltf_mesh_9",
-    "obj_gltf_mesh_10",
-    "obj_gltf_mesh_11",
-    "obj_gltf_mesh_12",
-    "obj_mesh_hartford",
-    "obj_mesh_liberty",
-    "obj_mesh_sofi"
-  ],
-
-
 "Custom Nearmap Widget": [
 "nearmap_widget_mapboxGL_side_by_side",
 "nearmap_widget_google_streetview"

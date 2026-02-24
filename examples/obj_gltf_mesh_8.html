@@ -67,7 +67,7 @@
       scene.background = new THREE.Color(0xbbbbbb);
       scene.environment = pmremGenerator.fromScene(environment).texture;
 
-      const grid = new THREE.GridHelper(500, 10, 0xffffff, 0xffffff);
+      const grid = new THREE.GridHelper(2000, 80, 0xffffff, 0xffffff);
       grid.material.opacity = 0.5;
       grid.material.depthWrite = false;
       grid.material.transparent = true;
