@@ -41,7 +41,7 @@
 
 			init();
 
-			function init() {
+			async function init() {
 
 				const container = document.createElement( 'div' );
 				document.body.appendChild( container );
@@ -54,7 +54,7 @@
 				renderer.outputEncoding = THREE.sRGBEncoding;
 				container.appendChild( renderer.domElement );
 
-				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 2000 );
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 2000 );
 				camera.position.set( 0, 100, 0 );
 
 				const environment = new RoomEnvironment();
@@ -75,23 +75,32 @@
 					.setTranscoderPath( 'js/libs/basis/' )
 					.detectSupport( renderer );
 
-				const loader = new GLTFLoader().setPath( 'https://d3e0kl50ei6ri7.cloudfront.net/sandiego/' );
+				const localBasePath = '../examples/models/nearmap/kew_gardens/';
+				const awsS3Path = 'https://d3e0kl50ei6ri7.cloudfront.net/kew_gardens/';
+				const glbFile = 'kew_gardens.glb';
+				const localFileExists = await checkFileExists( localBasePath + glbFile );
+				const basePath = localFileExists ? localBasePath : awsS3Path;
+				const loader = new GLTFLoader().setPath( basePath );
 				loader.setKTX2Loader( ktx2Loader );
 				loadingOverlay.show();
-				loader.load( 'sandiego_highway.glb', function ( gltf ) {
+				loader.load( glbFile, function ( gltf ) {
 					loadingOverlay.hide();
-					gltf.scene.position.y = 8;
 					scene.add( gltf.scene );
 
 					const box = new THREE.Box3().setFromObject( gltf.scene );
 					const center = box.getCenter( new THREE.Vector3() );
 					const size = box.getSize( new THREE.Vector3() );
-					const maxDim = Math.max( size.x, size.y, size.z ) || 1;
-					const distance = Math.max( maxDim * 1.6, 120 );
-					controls.target.copy( center );
-					camera.position.set( center.x + distance * 0.5, center.y + distance * 0.6, center.z + distance * 0.5 );
-					controls.minDistance = maxDim * 0.4;
-					controls.maxDistance = distance * 2.5;
+					gltf.scene.position.sub( center );
+					gltf.scene.position.y += 8;
+
+					const box2 = new THREE.Box3().setFromObject( gltf.scene );
+					const size2 = box2.getSize( new THREE.Vector3() );
+					const maxDim = Math.max( size2.x, size2.y, size2.z ) || 1;
+					const distance = Math.max( maxDim * 2.5, 150 );
+					controls.target.set( 0, 8, 0 );
+					camera.position.set( distance * 0.4, 8 + distance * 0.7, distance * 0.6 );
+					controls.minDistance = maxDim * 0.3;
+					controls.maxDistance = distance * 3;
 					controls.update();
 					controls.autoRotate = true;
 
@@ -138,6 +147,15 @@
 
 				renderer.render( scene, camera );
 
+			}
+
+			async function checkFileExists( url ) {
+				try {
+					const response = await fetch( url, { method: 'HEAD' } );
+					return response.ok;
+				} catch ( error ) {
+					return false;
+				}
 			}
 
 		</script>
