@@ -2,22 +2,16 @@
 
 
   "ESRI": [
-    "nearmap_arcgis_digital_twin_demo",
-    "nearmap_vector_AI_gen_3",
-    "nearmap_arcgis_pro_video_rendering_multiview",
     "nearmap_arcgis_vector_AI_Colorado_Sample",
     "nearmap_arcgis_pro_LOD2_fused_buildings",
     "nearmap_arcgis_pro_LOD2_Plesanton_CA",
     "nearmap_arcgis_pro_Flordia_Transportation_Cooridor_Study",
-    "nearmap_arcgis_pro_point_cloud",
-    "nearmap_arcgis_pro_LOD2_buildings_Ocean_City_NJ",
     "nearmap_arcgis_pro_solar_analysis"
 
   ],
 
   "Dashboards": [
     "nearmap_dashboard_impact_response",
-    "nearmap_dashboard_veg_management_kc",
     "nearmap_vector_AI_insurance_roof_conditions",
     "nearmap_dashboard_Impact_response_deploy",
     "nearmap_dashboard_bulding_change_map",
@@ -65,7 +59,6 @@
     "nearmap_mapbox_terrain"
   ],
   "Openlayers": [
-    "nearmap_openlayers_tile_custom_app",
     "nearmap_openlayers_coverage_map_custom_app"
   ],
 
@@ -116,11 +109,6 @@
 ],
 
   "Video Renders": [
-    "nearmap_twinmotion_rendering_1",
-    "nearmap_twinmotion_rendering_2",
-    "nearmap_twinmotion_rendering_3",
-    "nearmap_twinmotion_rendering_4",
-    "nearmap_twinmotion_rendering_5",
     "nearmap_video_classified_lidar_vs_pc",
     "nearmap_video_insurance_AI_labelled",
     "nearmap_video_massport_video",
@@ -138,5 +126,20 @@
     "nearmap_cesium_ion_example",
     "nearmap_cesium_ion_KGI",
     "nearmap_infraworks_full_dataset"
+  ],
+
+  "Archived": [
+    "nearmap_arcgis_digital_twin_demo",
+    "nearmap_vector_AI_gen_3",
+    "nearmap_arcgis_pro_video_rendering_multiview",
+    "nearmap_arcgis_pro_point_cloud",
+    "nearmap_arcgis_pro_LOD2_buildings_Ocean_City_NJ",
+    "nearmap_dashboard_veg_management_kc",
+    "nearmap_openlayers_tile_custom_app",
+    "nearmap_twinmotion_rendering_1",
+    "nearmap_twinmotion_rendering_2",
+    "nearmap_twinmotion_rendering_3",
+    "nearmap_twinmotion_rendering_4",
+    "nearmap_twinmotion_rendering_5"
   ]
 }

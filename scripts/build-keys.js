@@ -79,19 +79,21 @@ var CESIUM_ION_TOKEN = ${JSON.stringify(keys.CESIUM_ION_TOKEN)};
     var banner = document.createElement('div');
     banner.id = 'nearmap-api-key-notification';
     banner.setAttribute('role', 'alert');
-    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;padding:12px 16px;background:#d32f2f;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:14px;line-height:1.5;box-shadow:0 2px 8px rgba(0,0,0,0.2);display:flex;align-items:flex-start;gap:12px';
-    var keyList = missing.map(function(k) { return k.info.label + ' (' + k.name + ')'; }).join(', ');
+    banner.style.cssText = 'position:fixed;bottom:12px;right:12px;z-index:99999;padding:10px 14px;background:rgba(50,50,50,0.9);color:rgba(255,255,255,0.85);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:12px;line-height:1.4;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.15);display:flex;align-items:center;gap:10px;max-width:360px;backdrop-filter:blur(8px)';
+    var keyList = missing.map(function(k) { return k.info.label; }).join(', ');
     var msg = document.createElement('div');
     msg.style.flex = '1';
-    msg.innerHTML = '<strong>Missing API keys:</strong> This example cannot load without API keys. Add keys via Netlify env vars (<code>MAPBOX_PUBLIC_TOKEN</code>, <code>GOOGLE_MAPS_API_KEY</code>, <code>CESIUM_ION_ACCESS_TOKEN</code>) or local <code>.env</code> / <code>examples/keys.js</code>. Missing: ' + keyList + '.';
+    msg.innerHTML = '<strong style="color:#ffb74d">Missing keys:</strong> ' + keyList;
     var btn = document.createElement('button');
-    btn.textContent = 'Dismiss';
-    btn.style.cssText = 'background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.5);color:#fff;padding:6px 12px;cursor:pointer;font-size:13px;border-radius:4px;flex-shrink:0';
+    btn.textContent = '\u00d7';
+    btn.style.cssText = 'background:none;border:none;color:rgba(255,255,255,0.5);padding:0 2px;cursor:pointer;font-size:18px;line-height:1;flex-shrink:0';
+    btn.onmouseover = function() { btn.style.color = '#fff'; };
+    btn.onmouseout = function() { btn.style.color = 'rgba(255,255,255,0.5)'; };
     btn.onclick = function() { banner.remove(); };
     banner.appendChild(msg);
     banner.appendChild(btn);
     function append() {
-      if (document.body) document.body.insertBefore(banner, document.body.firstChild);
+      if (document.body) document.body.appendChild(banner);
       else document.addEventListener('DOMContentLoaded', append);
     }
     append();
