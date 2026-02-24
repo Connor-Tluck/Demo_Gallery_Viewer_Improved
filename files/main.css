@@ -112,6 +112,10 @@ h1 a {
 	min-width: 0;
 	flex-shrink: 0;
 }
+
+#mobileHomeButton {
+	display: none;
+}
 #header h1 {
 	padding-left: var(--panel-padding);
 	flex: 1;
@@ -925,6 +929,33 @@ iframe#viewer {
 		grid-template-columns: repeat(2, 1fr);
 	}
 
+	#mobileHomeButton {
+		display: flex !important;
+		width: 36px;
+		height: 36px;
+		min-width: 36px;
+		flex-shrink: 0;
+		margin-right: 8px;
+		cursor: pointer;
+		background-color: var(--text-color);
+		-webkit-mask-image: url(../files/ic_home_black_24dp.svg);
+		-webkit-mask-size: var(--icon-size);
+		-webkit-mask-position: 50% 50%;
+		-webkit-mask-repeat: no-repeat;
+		mask-image: url(../files/ic_home_black_24dp.svg);
+		mask-size: var(--icon-size);
+		mask-position: 50% 50%;
+		mask-repeat: no-repeat;
+		align-items: center;
+		justify-content: center;
+		transition: background-color 0.15s;
+	}
+	#mobileHomeButton:hover {
+		background-color: var(--color-blue);
+	}
+	#panel.collapsed #header #mobileHomeButton {
+		margin-right: auto;
+	}
 	#panel #panelToggle {
 		display: flex !important;
 		margin-right: 6px;

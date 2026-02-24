@@ -62,6 +62,7 @@
   <body>
     <div id="panel">
       <div id="header">
+        <div id="mobileHomeButton" data-tooltip="Home" aria-label="Go to home"></div>
         <h1><a href="index.html" id="homeLink">Nearmap Demo</a></h1>
 
         <div id="sections">
@@ -402,6 +403,13 @@
             e.preventDefault();
             showHome();
           }
+        });
+
+        document.getElementById("mobileHomeButton").addEventListener("click", function (e) {
+          e.preventDefault();
+          if (window.hideGalleryTooltip) window.hideGalleryTooltip();
+          panel.classList.remove("open");
+          showHome();
         });
 
         window.addEventListener("message", function (e) {
