@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Nearmap Tile API Deep Learning Map</title>
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+    .esri-widget {
+      padding: 10px;
+    }
+    .esri-slider {
+      width: 100%;
+    }
+  </style>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css" />
+  <script src="https://js.arcgis.com/4.26/"></script>
+  <script src="./keys.js"></script>
+
+  <script>
+    require([
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/widgets/Swipe",
+      "esri/layers/BaseTileLayer",
+    ], function (Map, MapView, Swipe, BaseTileLayer) {
+
+      // User Parameters - set NEARMAP_KEY in keys.js
+      const NEARMAP_API_KEY = (typeof NEARMAP_KEY !== "undefined" ? NEARMAP_KEY : "");
+
+      // Constants
+      const VERT = "Vert";
+      const NORTH = "North";
+      const EAST = "East";
+      const SOUTH = "South";
+      const WEST = "West";
+
+            const NearmapTileLayer = BaseTileLayer.createSubclass({
+              orientation: VERT,
+              setOrientation: function (orientation) {
+                this.orientation = orientation;
+                this.refresh();
+              },
+              fetchTile: function (level, row, col) {
+                const url = `https://api.nearmap.com/tiles/v3/${this.orientation}/${level}/${col}/${row}.jpg?apikey=${NEARMAP_API_KEY}`;
+                return fetch(url)
+                        .then(response => {
+                          if (response.ok) {
+                            return response.blob();
+                          }
+                          return null;
+                        })
+                        .then(blob => {
+                          return createImageBitmap(blob, {
+                            //imageOrientation: "flipY",
+                            premultiplyAlpha: "none",
+                          }).then(imageBitmap => {
+                            // Return the image as-is if VERT orientation is selected
+                            if (this.orientation === VERT) {
+                              return imageBitmap;
+                            }
+
+                            // Create a new canvas with the image dimensions
+                            const canvas = document.createElement("canvas");
+                            if (this.orientation === NORTH || this.orientation === SOUTH) {
+                              canvas.width = imageBitmap.height;
+                              canvas.height = imageBitmap.width;
+                            } else {
+                              canvas.width = imageBitmap.width;
+                              canvas.height = imageBitmap.height;
+                            }
+
+                            // Get the rotation angle based on the selected orientation
+                            let angle = 0;
+                            switch (this.orientation) {
+                              case NORTH:
+                                angle = 0;
+                                break;
+                              case EAST:
+                                angle = 90;
+                                break;
+                              case SOUTH:
+                                angle = 180;
+                                break;
+                              case WEST:
+                                angle = 270;
+                                break;
+                              default:
+                                angle = 0;
+                            }
+
+                            // Rotate the canvas context by the angle
+                            const ctx = canvas.getContext("2d");
+                            ctx.translate(canvas.width / 2, canvas.height / 2);
+                            ctx.rotate(angle * Math.PI / 180);
+
+                            // Draw the rotated image on the canvas
+                            ctx.drawImage(imageBitmap, -imageBitmap.width / 2, -imageBitmap.height / 2);
+
+                            // Return the rotated image as an ImageBitmap
+                            return createImageBitmap(canvas);
+                          });
+                        })
+                        .catch(error => {
+                          console.error(error);
+                          return null;
+                        });
+              },
+              title: "Nearmap Imagery",
+              id: "nearmap-tile-layer",
+              visible: true,
+              opacity: 1
+            });
+            const nearmapTileLayer = new NearmapTileLayer();
+
+            const map = new Map({
+              basemap: "topo-vector",
+              layers: [nearmapTileLayer]
+            });
+            const view = new MapView({
+              container: "viewDiv",
+              map: map,
+              zoom: 20,
+              center: [-117.161545, 32.715406]
+            });
+            const dropdown = document.createElement("select");
+      dropdown.id = "options";
+      dropdown.className = "esri-widget esri-select";
+      const options = [VERT, NORTH, EAST, SOUTH, WEST];
+      for (const option of options) {
+        const opt = document.createElement("option");
+        opt.value = option;
+        opt.text = option;
+        dropdown.add(opt);
+      }
+            view.ui.add(dropdown, "top-right");
+            dropdown.addEventListener("change", function () {
+              nearmapTileLayer.setOrientation(dropdown.value);
+            });
+            const sliderDiv = document.createElement("div");
+      sliderDiv.className = "esri-widget";
+      const slider = document.createElement("input");
+      slider.type = "range";
+      slider.min = 0;
+      slider.max = 100;
+      slider.value = 100;
+      slider.className = "esri-slider";
+      slider.addEventListener("input", function () {
+        nearmapTileLayer.opacity = this.value / 100;
+      });
+      sliderDiv.appendChild(slider);
+      view.ui.add(sliderDiv, "top-right");
+    });
+  </script>
+</head>
+<body>
+<div id="viewDiv"></div>
+<div id="optionsDiv">
+  <label htmlFor="options">Orientation:</label>
+  <select id="options" className="esri-widget esri-select">
+    <option value="Vert">Vert</option>
+    <option value="North">North</option>
+    <option value="East">East</option>
+    <option value="South">South</option>
+    <option value="West">West</option>
+  </select>
+</div>
+<div id="sliderDiv"></div>
+</body>
+</html>

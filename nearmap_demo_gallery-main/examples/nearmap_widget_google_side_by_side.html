@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Map Sync Example</title>
+    <!--<script src="https://apps.nearmap.com/widget/v1/sdk.js"></script>-->
+    <script src="https://qa-apps.nearmapdev.com/master/widget/v1/sdk.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=Function.prototype"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        #map1,
+        #nearmap-widget {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            height: 100%;
+        }
+        
+        #nearmap-widget {
+            right: 0;
+        }
+    </style>
+</head>
+
+<body>
+<div id="map1"></div>
+<div id="nearmap-widget"></div>
+
+<script>
+    let map1IdleListener, map2IdleListener;
+    const sync_method = "map1" // options: "map1", "map2", "dual"
+    const start_coords = [37.7749, -122.4194]
+    const start_zoom = 18
+    const sync_timeout = 500
+
+    const signedURL = "{{SIGNED_URL}}";
+    const widgetURL = 'https://qa-apps.nearmapdev.com/master/widget/';
+    const initialView = { location: { lat: start_coords[0], lon: start_coords[1] }, zoom: start_zoom };
+    const options = { signedURL, widgetURL, initialView};
+
+    // Initialize the first map
+    const map1 = new google.maps.Map(document.getElementById("map1"), {
+        zoom: start_zoom,
+        center: {lat: start_coords[0], lng: start_coords[1]}
+    });
+
+    // Initialize the second map
+    const map2 =  document.getElementById('nearmap-widget');
+    window.NearmapWidget.initialize(map2, options);
+
+
+    // Synchronize the maps when the user interacts with one of them
+    // https://developers.google.com/maps/documentation/javascript/events
+    if (sync_method === "map1") {
+
+        //NOTE****
+        // center_changed is fired when the map center changes.
+        // https://developers.google.com/maps/documentation/javascript/events#MapEvents
+        // Other option is "idle" which is fired when the map becomes idle after panning or zooming.
+        google.maps.event.addListener(map1, "center_changed", function() { 
+        var center = this.getCenter();
+        var shift_latitude = center.lat();
+        var shift_longitude = center.lng();
+        var shift_zoom = this.getZoom();
+        console.log("current latitude is: " + shift_latitude);
+        console.log("current longitude is: " + shift_longitude);
+        console.log("current zoom is: " + shift_zoom);
+        
+        let view = { location: { lat: shift_latitude, lon: shift_longitude }, zoom: shift_zoom };
+        window.NearmapWidget.goToView(view);
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+# # all large files, printed from console with git lfs ls-files --all
+# # https://stackoverflow.com/questions/46155906/git-lfs-get-the-complete-list-from-the-whole-repository
+
+examples/models/nearmap/_gltf/hartford_testing.glb filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/hartford/hartford.glb filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/chicago/chicago.glb filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/chicago/Mesh/Mesh.obj filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/_gltf/hartford_testing_glft_embedded.gltf filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/_gltf/hartford_testing_glft_sep.gltf filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/chicago/Mesh/Mesh.obj filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/chicago/chicago.dae filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/chicago/chicago.glb filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/chicago/chicago_mesh_large.glb filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/chicago/chicago_mesh_large_zero_elevation.glb filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/chicago/chicago_mesh_very_large_zero_elevation.glb filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/detroit/Mesh_0_0/Mesh_0_0.obj filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/detroit/Mesh_1_0/Mesh_1_0.obj filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/detroit/total_mesh.obj filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/disney/disney.glb filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/hartford/Mesh/Mesh.obj filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/kew_gardens/kew_gardens.glb filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/nyc/Mesh/Mesh.obj filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/sf/Mesh/Mesh.obj filter=lfs diff=lfs merge=lfs -text
+examples/models/nearmap/sofi/Mesh/Mesh.obj filter=lfs diff=lfs merge=lfs -text
+examples/models/obj/cerberus/Cerberus.obj filter=lfs diff=lfs merge=lfs -text
+examples/models/obj/emerald.obj filter=lfs diff=lfs merge=lfs -text
+examples/models/obj/female02/female02.obj filter=lfs diff=lfs merge=lfs -text
+examples/models/obj/female02/female02_vertex_colors.obj filter=lfs diff=lfs merge=lfs -text
+examples/models/obj/male02/male02.obj filter=lfs diff=lfs merge=lfs -text
+examples/models/obj/ninja/ninjaHead_Low.obj filter=lfs diff=lfs merge=lfs -text
+examples/models/obj/tree.obj filter=lfs diff=lfs merge=lfs -text
+examples/models/obj/walt/WaltHead.obj filter=lfs diff=lfs merge=lfs -text
+examples/videos/3D_Flythrough_Pittsburgh_PA_Blue_720p.mp4 filter=lfs diff=lfs merge=lfs -text
+examples/videos/3D_Flythrough_Pompano_Beach_FL_202110_720p.mp4 filter=lfs diff=lfs merge=lfs -text
+examples/videos/ArcUrban_LOD2_Buildings_Plan_Overlay.mp4 filter=lfs diff=lfs merge=lfs -text
+examples/videos/PHL_Center_City_Flyover_Branded.mp4 filter=lfs diff=lfs merge=lfs -text
+examples/videos/PIT_Flythrough_60sec.mp4 filter=lfs diff=lfs merge=lfs -text
+
+

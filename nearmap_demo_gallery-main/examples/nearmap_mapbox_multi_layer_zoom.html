@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Web Map</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <script src="./keys.js"></script>
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        mapboxgl.accessToken = MAPBOX_KEY;
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/dark-v10',
+            center: [-73.99855440078873, 40.7226242281274], // starting position
+            zoom: 14 // starting zoom
+        });
+
+        map.on('load', function() {
+            map.addSource('nearmap-tiles', {
+                type: 'raster',
+                tiles: [`https://api.nearmap.com/tiles/v3/Vert/{z}/{x}/{y}.jpg?tertiary=satellite&apikey=${NEARMAP_KEY}`],
+                tileSize: 256,
+                attribution: 'Map Tiles by Nearmap'
+            });
+
+            map.addLayer({
+                id: 'nearmap-layer',
+                type: 'raster',
+                source: 'nearmap-tiles',
+                minzoom: 15,
+                maxzoom: 22
+            });
+
+            map.addLayer({
+                id: 'dark-layer',
+                type: 'raster',
+                source: 'composite',
+                'source-layer': 'dark-v10',
+                minzoom: 0,
+                maxzoom: 15
+            });
+        });
+    </script>
+</body>
+</html>

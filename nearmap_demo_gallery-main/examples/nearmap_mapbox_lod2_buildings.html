@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Display buildings in 3D</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.3.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.3.0/mapbox-gl.js"></script>
+<script src="./keys.js"></script>
+<style>
+body { margin: 0; padding: 0; }
+#map { position: absolute; top: 0; bottom: 0; width: 100%; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+	mapboxgl.accessToken = MAPBOX_KEY;
+    var map = new mapboxgl.Map({
+        style: 'mapbox://styles/mapbox/light-v10',
+        center: [144.986523, -37.806088],
+        zoom: 15.5,
+        pitch: 45,
+        bearing: -17.6,
+        container: 'map',
+        antialias: true
+    });
+
+    var melb_3d = '../examples/nearmap_assets/mapbox_assets/lod2_buildings/melb_wgs84.geojson';
+    var melb_veg_3d = '../examples/nearmap_assets/mapbox_assets/lod2_buildings/melb_veg_wgs84.geojson';
+
+    map.on('load', function () {
+        map.addSource("data_buildings", {
+            type: "geojson",
+            data: melb_3d,
+        });
+
+        map.addSource("data_veg", {
+            type: "geojson",
+            data: melb_veg_3d,
+        });
+
+        map.addLayer(
+            {
+                'id': 'melb_3d',
+                'source': 'data_buildings',
+                'type': 'fill-extrusion',
+                'paint': {
+                    'fill-extrusion-color': '#aaa',
+                    'fill-extrusion-height': ['get', 'AGL'],
+                    'fill-extrusion-opacity': 0.6
+                }
+            },
+        );
+
+                map.addLayer(
+            {
+                'id': 'melb_veg_3d',
+                'source': 'data_veg',
+                'type': 'fill-extrusion',
+                'paint': {
+                    'fill-extrusion-color': '#71906e',
+                    'fill-extrusion-height': ['get', 'Height'],
+                    'fill-extrusion-opacity': 0.6
+                }
+            },
+        );
+
+    });
+</script>
+
+</body>
+</html>

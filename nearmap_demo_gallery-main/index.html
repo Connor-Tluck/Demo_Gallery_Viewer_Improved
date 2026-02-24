@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Nearmap Demo</title>
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+    <link
+      rel="shortcut icon"
+      href="examples/files/favicon_white.ico"
+      media="(prefers-color-scheme: dark)"
+    />
+    <link
+      rel="shortcut icon"
+      href="examples/files/favicon.ico"
+      media="(prefers-color-scheme: light)"
+    />
+    <link rel="stylesheet" type="text/css" href="files/main.css" />
+    <style>
+      #galleryTooltip {
+        position: fixed;
+        z-index: 10001;
+        max-width: 280px;
+        max-height: 70vh;
+        overflow-y: auto;
+        padding: 8px 12px;
+        font-size: 13px;
+        line-height: 1.4;
+        color: var(--text-color);
+        background: var(--secondary-background-color);
+        border: var(--border-style);
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.1s ease;
+      }
+      #galleryTooltip.visible {
+        opacity: 1;
+      }
+    </style>
+
+    <!-- Google tag (gtag.js) -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-ZY8MG5QH3K"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-ZY8MG5QH3K");
+    </script>
+  </head>
+  <body>
+    <div id="panel">
+      <div id="header">
+        <h1><a href="index.html" id="homeLink">Nearmap Demo</a></h1>
+
+        <div id="sections">
+          <a href="index.html"></a>
+          <span class="selected">examples</span>
+        </div>
+
+        <div id="panelToggle" data-tooltip="Expand sidebar"></div>
+      </div>
+
+      <div id="panelScrim"></div>
+
+      <div id="collapsedStrip">
+        <div id="collapsedCategories"></div>
+      </div>
+      <div id="collapsedFlyout">
+        <div id="collapsedFlyoutTitle"></div>
+        <div id="collapsedFlyoutList"></div>
+      </div>
+
+      <div id="contentWrapper">
+        <div id="inputWrapper">
+          <input
+            placeholder="Search examples..."
+            type="text"
+            id="filterInput"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+          />
+          <div id="exitSearchButton"></div>
+        </div>
+
+        <div id="content">
+          <img
+            id="previewsToggler"
+            src="examples/files/thumbnails.svg"
+            width="20"
+            height="20"
+          />
+        </div>
+      </div>
+    </div>
+
+    <iframe
+      id="viewer"
+      name="viewer"
+      allow="fullscreen; xr-spatial-tracking;"
+    ></iframe>
+
+    <a id="button" target="_blank"
+      ><img src="files/ic_code_black_24dp.svg"
+    /></a>
+
+    <div id="galleryTooltip" role="tooltip" aria-hidden="true"></div>
+
+    <script>
+      const panel = document.getElementById("panel");
+      const content = document.getElementById("content");
+      const viewer = document.getElementById("viewer");
+      const filterInput = document.getElementById("filterInput");
+      const exitSearchButton = document.getElementById("exitSearchButton");
+      const panelToggle = document.getElementById("panelToggle");
+      const collapsedStrip = document.getElementById("collapsedStrip");
+      const collapsedCategories = document.getElementById("collapsedCategories");
+      const collapsedFlyout = document.getElementById("collapsedFlyout");
+      const collapsedFlyoutTitle = document.getElementById("collapsedFlyoutTitle");
+      const collapsedFlyoutList = document.getElementById("collapsedFlyoutList");
+      const categoryFiles = {};
+      const viewSrcButton = document.getElementById("button");
+      const panelScrim = document.getElementById("panelScrim");
+      const previewsToggler = document.getElementById("previewsToggler");
+
+      const sectionLink = document.querySelector("#sections > a");
+      const sectionDefaultHref = sectionLink.href;
+
+      const links = {};
+      const validRedirects = new Map();
+      const container = document.createElement("div");
+      let displayNames = {};
+      let descriptions = {};
+
+      const categoryShortNames = {
+        "Arcgis Javascript SDK": "ArcGIS",
+        "3D Mesh": "3D Mesh",
+        "Transactional API": "TX API",
+        "Custom Nearmap Widget": "Widgets",
+        "Video Gallery": "Videos",
+        "Video Renders": "Renders",
+        "Engineering Design": "Engineering"
+      };
+
+      let selected = null;
+
+      function showHome() {
+        selected = null;
+        document.body.classList.add("home");
+        if (Object.keys(links).length) {
+          Object.keys(links).forEach(function (f) { links[f].classList.remove("selected"); });
+        }
+        window.history.replaceState({}, "", window.location.pathname + window.location.search);
+        viewer.removeAttribute("srcdoc");
+        viewer.src = "examples/home.html";
+        viewer.style.display = "unset";
+      }
+
+      init();
+
+      async function init() {
+        content.appendChild(container);
+
+        viewSrcButton.style.display = "none";
+
+        const [filesRes, tagsRes, namesRes, descRes] = await Promise.all([
+          fetch("examples/files.json"),
+          fetch("examples/tags.json"),
+          fetch("examples/display-names.json").catch(() => null),
+          fetch("examples/descriptions.json").catch(() => null)
+        ]);
+        const files = await filesRes.json();
+        const tags = await tagsRes.json();
+        descriptions = (descRes && descRes.ok) ? await descRes.json() : {};
+        if (namesRes && namesRes.ok) displayNames = await namesRes.json();
+
+        for (const key in files) {
+          const category = files[key];
+
+          const header = document.createElement("h2");
+          header.textContent = categoryShortNames[key] || key;
+          header.setAttribute("data-category", key);
+          container.appendChild(header);
+
+          categoryFiles[key] = category.slice();
+
+          const collapsedPill = document.createElement("div");
+          collapsedPill.className = "collapsed-pill";
+          const shortName = categoryShortNames[key] || key;
+          collapsedPill.textContent = shortName.length > 6 ? shortName.slice(0, 6) : shortName;
+          collapsedPill.setAttribute("data-category", key);
+          collapsedPill.title = categoryShortNames[key] || key;
+          collapsedCategories.appendChild(collapsedPill);
+
+          for (let i = 0; i < category.length; i++) {
+            const file = category[i];
+
+            const link = createLink(file, tags[file]);
+            container.appendChild(link);
+
+            links[file] = link;
+            validRedirects.set(file, file + ".html");
+          }
+        }
+
+        if (window.location.hash !== "") {
+          const file = window.location.hash.substring(1);
+
+          // use a predefined map of redirects to avoid untrusted URL redirection due to user-provided value
+
+          if (validRedirects.has(file) === true) {
+            selectFile(file);
+            viewer.src = "examples/" + file + ".html";
+            viewer.style.display = "unset";
+          } else {
+            showHome();
+          }
+        } else {
+          showHome();
+        }
+
+        filterInput.value = extractQuery();
+
+        if (filterInput.value !== "") {
+          panel.classList.add("searchFocused");
+
+          updateFilter(files, tags);
+        } else {
+          updateLink("");
+        }
+
+        // Events
+
+        filterInput.onfocus = function () {
+          panel.classList.add("searchFocused");
+        };
+
+        filterInput.onblur = function () {
+          if (filterInput.value === "") {
+            panel.classList.remove("searchFocused");
+          }
+        };
+
+        exitSearchButton.onclick = function () {
+          filterInput.value = "";
+          updateFilter(files, tags);
+          panel.classList.remove("searchFocused");
+        };
+
+        let filterTimeout;
+        filterInput.addEventListener("input", function () {
+          clearTimeout(filterTimeout);
+          filterTimeout = setTimeout(() => updateFilter(files, tags), 150);
+        });
+        filterInput.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") {
+            clearTimeout(filterTimeout);
+            updateFilter(files, tags);
+          }
+        });
+
+        document.getElementById("homeLink").addEventListener("click", function (e) {
+          if (e.button === 0 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            e.preventDefault();
+            showHome();
+          }
+        });
+
+        window.addEventListener("message", function (e) {
+          if (e.data && e.data.type === "galleryNavigate" && e.data.hash && validRedirects.has(e.data.hash)) {
+            var linkAnchor = links[e.data.hash] ? links[e.data.hash].querySelector('a[target="viewer"]') : null;
+            if (linkAnchor) linkAnchor.click();
+            else {
+              selectFile(e.data.hash);
+              viewer.removeAttribute("srcdoc");
+              viewer.src = "examples/" + e.data.hash + ".html";
+              viewer.style.display = "unset";
+            }
+          }
+        });
+
+        function updatePanelToggleTooltip() {
+          if (window.innerWidth <= 640) {
+            panelToggle.setAttribute("data-tooltip", panel.classList.contains("open") ? "Close sidebar" : "Open sidebar");
+          } else {
+            panelToggle.setAttribute("data-tooltip", panel.classList.contains("collapsed") ? "Expand sidebar" : "Minimize sidebar");
+          }
+        }
+
+        panelToggle.addEventListener("click", function (event) {
+          event.preventDefault();
+          if (window.hideGalleryTooltip) window.hideGalleryTooltip();
+          if (window.innerWidth <= 640) {
+            panel.classList.toggle("open");
+          } else {
+            panel.classList.toggle("collapsed");
+            localStorage.setItem("panelCollapsed", panel.classList.contains("collapsed"));
+            if (!panel.classList.contains("collapsed")) collapsedFlyout.classList.remove("open");
+          }
+          updatePanelToggleTooltip();
+        });
+
+        collapsedCategories.addEventListener("click", function (e) {
+          if (!e.target.classList.contains("collapsed-pill")) return;
+          if (window.hideGalleryTooltip) window.hideGalleryTooltip();
+          const cat = e.target.getAttribute("data-category");
+          const filesInCat = categoryFiles[cat] || [];
+          if (filesInCat.length === 0) {
+            panel.classList.remove("collapsed");
+            localStorage.setItem("panelCollapsed", "false");
+            return;
+          }
+          const isOpen = collapsedFlyout.classList.contains("open") && collapsedFlyout.dataset.category === cat;
+          if (isOpen) {
+            collapsedFlyout.classList.remove("open");
+            collapsedFlyout.dataset.category = "";
+            return;
+          }
+          collapsedFlyoutTitle.textContent = cat;
+          collapsedFlyoutList.innerHTML = "";
+          filesInCat.forEach(function (file) {
+            const a = document.createElement("a");
+            a.href = "examples/" + file + ".html";
+            a.target = "viewer";
+            a.className = "collapsed-flyout-item";
+            a.textContent = getName(file);
+            a.setAttribute("data-tooltip", getTooltipText(file, tags[file] || []));
+            a.title = "";
+            a.addEventListener("click", function (ev) {
+              ev.preventDefault();
+              ev.stopPropagation();
+              if (window.hideGalleryTooltip) window.hideGalleryTooltip();
+              collapsedFlyout.classList.remove("open");
+              var linkAnchor = links[file] ? links[file].querySelector('a[target="viewer"]') : null;
+              if (linkAnchor) {
+                linkAnchor.click();
+              } else {
+                viewer.removeAttribute("srcdoc");
+                viewer.src = new URL("examples/" + file + ".html", window.location.href).href;
+                selectFile(file);
+              }
+            });
+            collapsedFlyoutList.appendChild(a);
+          });
+          collapsedFlyout.dataset.category = cat;
+          collapsedFlyout.classList.add("open");
+        });
+
+        document.addEventListener("click", function (e) {
+          if (collapsedFlyout.classList.contains("open") &&
+              !collapsedFlyout.contains(e.target) &&
+              !e.target.classList.contains("collapsed-pill")) {
+            if (window.hideGalleryTooltip) window.hideGalleryTooltip();
+            collapsedFlyout.classList.remove("open");
+          }
+        });
+
+        panelScrim.onclick = function (event) {
+          event.preventDefault();
+          panel.classList.toggle("open");
+        };
+
+        if (localStorage.getItem("panelCollapsed") === "true") {
+          panel.classList.add("collapsed");
+        }
+
+        updatePanelToggleTooltip();
+
+        previewsToggler.onclick = function (event) {
+          event.preventDefault();
+          content.classList.toggle("minimal");
+        };
+
+        // iOS iframe auto-resize workaround
+
+        if (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) {
+          viewer.style.width = getComputedStyle(viewer).width;
+          viewer.style.height = getComputedStyle(viewer).height;
+          viewer.setAttribute("scrolling", "no");
+        }
+
+        // Fast tooltip (150ms delay vs ~1s for native title)
+        setupFastTooltip();
+      }
+
+      function setupFastTooltip() {
+        const tooltipEl = document.getElementById("galleryTooltip");
+        const TOOLTIP_DELAY = 150;
+        let showTimer = null;
+        let currentTarget = null;
+
+        function showTooltip(el, text) {
+          tooltipEl.textContent = text;
+          tooltipEl.classList.add("visible");
+          tooltipEl.setAttribute("aria-hidden", "false");
+
+          const rect = el.getBoundingClientRect();
+          const padding = 8;
+          const gap = 8;
+          const tw = tooltipEl.offsetWidth;
+          const th = tooltipEl.offsetHeight;
+
+          // Prefer right of element (sidebar is on left, so space to the right)
+          let left = rect.right + gap;
+          let top = rect.top + (rect.height / 2) - (th / 2);
+
+          const maxLeft = window.innerWidth - tw - padding;
+          const minLeft = padding;
+          const minTop = padding;
+          const maxTop = window.innerHeight - th - padding;
+
+          if (left + tw > window.innerWidth - padding) {
+            left = rect.left - tw - gap;
+          }
+          if (left < minLeft) {
+            left = minLeft;
+          }
+          left = Math.max(minLeft, Math.min(left, maxLeft));
+          top = Math.max(minTop, Math.min(top, maxTop));
+
+          tooltipEl.style.left = left + "px";
+          tooltipEl.style.top = top + "px";
+        }
+
+        function hideTooltip() {
+          if (showTimer) {
+            clearTimeout(showTimer);
+            showTimer = null;
+          }
+          currentTarget = null;
+          tooltipEl.classList.remove("visible");
+          tooltipEl.setAttribute("aria-hidden", "true");
+        }
+        window.hideGalleryTooltip = hideTooltip;
+
+        panel.addEventListener("mouseover", function (e) {
+          const el = e.target.closest("[data-tooltip]");
+          if (!el) {
+            if (!panel.contains(e.relatedTarget)) hideTooltip();
+            return;
+          }
+          if (el === currentTarget) return;
+          hideTooltip();
+          currentTarget = el;
+          const text = el.getAttribute("data-tooltip");
+          if (!text) return;
+          showTimer = setTimeout(() => showTooltip(el, text), TOOLTIP_DELAY);
+        });
+
+        panel.addEventListener("mouseout", function (e) {
+          if (!panel.contains(e.relatedTarget)) hideTooltip();
+        });
+      }
+
+      function getTooltipText(file, tags) {
+        const desc = descriptions[file] || getName(file) + " demo.";
+        const tagList = Array.isArray(tags) && tags.length
+          ? tags.filter(t => t.length > 1).join(", ")
+          : "";
+        return tagList ? `${desc} Tags: ${tagList}` : desc;
+      }
+
+      function escapeAttr(s) {
+        return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+
+      function createLink(file, tags) {
+        const external =
+          Array.isArray(tags) && tags.includes("external")
+            ? ' <span class="tag">external</span>'
+            : "";
+
+        const tooltip = escapeAttr(getTooltipText(file, tags));
+
+        const template = `
+				<div class="card" data-tooltip="${tooltip}" title="">
+					<a href="examples/${file}.html" target="viewer" data-tooltip="${tooltip}" title="">
+						<div class="cover">
+							<img src="examples/screenshots/${file}.jpg" loading="lazy" width="400" />
+						</div>
+						<div class="title">${getName(file)}${external}</div>
+					</a>
+				</div>
+			`;
+
+        const link = createElementFromHTML(template);
+
+        link
+          .querySelector('a[target="viewer"]')
+          .addEventListener("click", function (event) {
+            if (
+              event.button !== 0 ||
+              event.ctrlKey ||
+              event.altKey ||
+              event.metaKey
+            )
+              return;
+
+            selectFile(file);
+          });
+
+        return link;
+      }
+
+      function selectFile(file) {
+        document.body.classList.remove("home");
+        if (selected !== null) links[selected].classList.remove("selected");
+
+        links[file].classList.add("selected");
+
+        window.location.hash = file;
+        viewer.focus();
+        viewer.style.display = "unset";
+
+        panel.classList.remove("open");
+
+        selected = file;
+
+        // Reveal "View source" button and set attributes to this example
+        // viewSrcButton.style.display = '';
+        // viewSrcButton.href = 'https://github.com/mrdoob/three.js/blob/master/examples/' + selected + '.html';
+        // viewSrcButton.title = 'View source code for ' + getName( selected ) + ' on GitHub';
+      }
+
+      function escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // https://stackoverflow.com/a/6969486/5250847
+      }
+
+      function updateFilter(files, tags) {
+        let v = filterInput.value.trim();
+        v = v.replace(/\s+/gi, " "); // replace multiple whitespaces with a single one
+
+        if (v !== "") {
+          window.history.replaceState({}, "", "?q=" + v + window.location.hash);
+        } else {
+          window.history.replaceState(
+            {},
+            "",
+            window.location.pathname + window.location.hash
+          );
+        }
+
+        const exp = new RegExp(escapeRegExp(v), "gi");
+
+        for (const key in files) {
+          const section = files[key];
+
+          for (let i = 0; i < section.length; i++) {
+            filterExample(section[i], exp, tags);
+          }
+        }
+
+        layoutList(files);
+
+        updateLink(v);
+      }
+
+      function updateLink(search) {
+        // update docs link
+
+        if (search) {
+          const link = sectionLink.href.split(/[?#]/)[0];
+          sectionLink.href = `${link}?q=${search}`;
+        } else {
+          sectionLink.href = sectionDefaultHref;
+        }
+      }
+
+      function filterExample(file, exp, tags) {
+        const link = links[file];
+        const name = getName(file);
+        if (file in tags) file += " " + tags[file].join(" ");
+        const res = file.match(exp);
+        let text;
+
+        if (res && res.length > 0) {
+          link.classList.remove("hidden");
+        } else {
+          link.classList.add("hidden");
+        }
+      }
+
+      function getName(file) {
+        if (displayNames[file]) return displayNames[file];
+        const parts = file.split("_");
+        parts.shift();
+        return parts.map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(" ");
+      }
+
+      function layoutList(files) {
+        for (const key in files) {
+          let collapsed = true;
+
+          const section = files[key];
+
+          for (let i = 0; i < section.length; i++) {
+            const file = section[i];
+
+            if (links[file].classList.contains("hidden") === false) {
+              collapsed = false;
+              break;
+            }
+          }
+
+          const element = document.querySelector(
+            'h2[data-category="' + key + '"]'
+          );
+
+          if (collapsed) {
+            element.classList.add("hidden");
+          } else {
+            element.classList.remove("hidden");
+          }
+        }
+      }
+
+      function extractQuery() {
+        const search = window.location.search;
+
+        if (search.indexOf("?q=") !== -1) {
+          return decodeURI(search.slice(3));
+        }
+
+        return "";
+      }
+
+      function createElementFromHTML(htmlString) {
+        const div = document.createElement("div");
+        div.innerHTML = htmlString.trim();
+        return div.firstChild;
+      }
+    </script>
+    <template id="PlaceholderHTML">
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="utf-8" />
+          <title>Nearmap Demo Gallery</title>
+          <meta
+            name="viewport"
+            content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+          />
+          <link rel="stylesheet" type="text/css" href="files/main.css" />
+          <style>
+            html,
+            body {
+              height: 100%;
+            }
+            body {
+              height: 100%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              user-select: none;
+            }
+          </style>
+        </head>
+        <body>
+          Select an example from the sidebar
+        </body>
+      </html>
+    </template>
+  </body>
+</html>

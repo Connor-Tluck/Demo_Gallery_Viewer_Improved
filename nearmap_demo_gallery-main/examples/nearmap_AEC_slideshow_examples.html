@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="main.css">
+    <title>AEC Nearmap Image Slider</title>
+    <style>
+      .gallery-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+        background-color: #0a0a0a;
+      }
+      .gallery-container {
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+        position: relative;
+      }
+      .gallery-container .carousel {
+        background: #1a1a1a;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      }
+      .gallery-container .carousel-inner {
+        height: 75vh;
+        min-height: 400px;
+        overflow: hidden;
+      }
+      .gallery-container .carousel-item {
+        height: 75vh;
+        min-height: 400px;
+        align-items: center;
+        justify-content: center;
+        background: #1a1a1a;
+      }
+      .gallery-container .carousel-item.active {
+        display: flex !important;
+      }
+      .gallery-container .carousel-item img {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        display: block;
+      }
+      .gallery-container .carousel-control-prev,
+      .gallery-container .carousel-control-next {
+        width: auto;
+        min-width: 64px;
+        height: 64px;
+        padding: 0 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        bottom: auto;
+        background: #fff;
+        border: 2px solid rgba(0, 0, 0, 0.2);
+        border-radius: 32px;
+        opacity: 1;
+        transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        z-index: 10;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+      .gallery-container .carousel-control-prev {
+        left: 1rem;
+      }
+      .gallery-container .carousel-control-next {
+        right: 1rem;
+      }
+      .gallery-container .carousel-control-prev .btn-label,
+      .gallery-container .carousel-control-next .btn-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #333;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .gallery-container .carousel-control-prev:hover,
+      .gallery-container .carousel-control-next:hover {
+        background: #f0f0f0;
+        transform: translateY(-50%) scale(1.08);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      }
+      .gallery-container .carousel-control-prev-icon,
+      .gallery-container .carousel-control-next-icon {
+        width: 28px;
+        height: 28px;
+        background-size: 28px 28px;
+        filter: none;
+      }
+      .gallery-container .carousel-control-prev-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23333' viewBox='0 0 16 16'%3e%3cpath d='M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z'/%3e%3c/svg%3e");
+      }
+      .gallery-container .carousel-control-next-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23333' viewBox='0 0 16 16'%3e%3cpath d='M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+      }
+      .gallery-container .carousel-indicators {
+        bottom: 1rem;
+        margin-bottom: 0;
+      }
+      .gallery-container .carousel-indicators li {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.5);
+        border: none;
+        margin: 0 4px;
+      }
+      .gallery-container .carousel-indicators li.active {
+        background-color: #fff;
+        transform: scale(1.2);
+      }
+      .slide-counter {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-family: system-ui, -apple-system, sans-serif;
+        z-index: 5;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="gallery-wrapper">
+      <div class="gallery-container">
+        <div id="carouselExampleControls" class="carousel slide" data-ride="carousel" data-interval="false">
+          <div class="carousel-inner">
+            <div class="carousel-item active">
+              <img class="d-block" src="slide_show_images/AEC/kgi_2.png" alt="AEC example 1">
+            </div>
+            <div class="carousel-item">
+              <img class="d-block" src="slide_show_images/AEC/kgi_3.png" alt="AEC example 2">
+            </div>
+            <div class="carousel-item">
+              <img class="d-block" src="slide_show_images/AEC/kgi_4.png" alt="AEC example 3">
+            </div>
+            <div class="carousel-item">
+              <img class="d-block" src="slide_show_images/AEC/kgi_5.png" alt="AEC example 4">
+            </div>
+            <div class="carousel-item">
+              <img class="d-block" src="slide_show_images/AEC/kgi_6.png" alt="AEC example 5">
+            </div>
+            <div class="carousel-item">
+              <img class="d-block" src="slide_show_images/AEC/kgi_7.png" alt="AEC example 6">
+            </div>
+            <div class="carousel-item">
+              <img class="d-block" src="slide_show_images/AEC/kgi_8.png" alt="AEC example 7">
+            </div>
+            <div class="carousel-item">
+              <img class="d-block" src="slide_show_images/AEC/kgi_9.png" alt="AEC example 8">
+            </div>
+          </div>
+          <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev" aria-label="Previous image">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="btn-label">Prev</span>
+          </a>
+          <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next" aria-label="Next image">
+            <span class="btn-label">Next</span>
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          </a>
+          <ol class="carousel-indicators">
+            <li data-target="#carouselExampleControls" data-slide-to="0" class="active"></li>
+            <li data-target="#carouselExampleControls" data-slide-to="1"></li>
+            <li data-target="#carouselExampleControls" data-slide-to="2"></li>
+            <li data-target="#carouselExampleControls" data-slide-to="3"></li>
+            <li data-target="#carouselExampleControls" data-slide-to="4"></li>
+            <li data-target="#carouselExampleControls" data-slide-to="5"></li>
+            <li data-target="#carouselExampleControls" data-slide-to="6"></li>
+            <li data-target="#carouselExampleControls" data-slide-to="7"></li>
+          </ol>
+          <span class="slide-counter" id="slideCounter">1 / 8</span>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script>
+      $(function() {
+        var $carousel = $('#carouselExampleControls');
+        var counter = document.getElementById('slideCounter');
+        var totalSlides = 8;
+
+        function updateCounter() {
+          var activeIndex = $carousel.find('.carousel-item.active').index();
+          counter.textContent = (activeIndex + 1) + ' / ' + totalSlides;
+        }
+
+        $carousel.on('slid.bs.carousel', updateCounter);
+
+        $(document).on('keydown', function(e) {
+          if (e.key === 'ArrowLeft') {
+            $carousel.carousel('prev');
+          } else if (e.key === 'ArrowRight') {
+            $carousel.carousel('next');
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

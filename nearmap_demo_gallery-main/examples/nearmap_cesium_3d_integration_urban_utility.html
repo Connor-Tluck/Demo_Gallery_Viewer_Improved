@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>CesiumJS 3D Tiles Async Demo</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/cesiumjs/1.105/Build/Cesium/Cesium.js"></script>
+  <link href="https://ajax.googleapis.com/ajax/libs/cesiumjs/1.105/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style>
+    html,
+    body,
+    #cesiumContainer {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+  <script src="./keys.js"></script>
+  <script>
+    // Grant CesiumJS access to your ion assets (set CESIUM_ION_TOKEN in keys.js)
+    Cesium.Ion.defaultAccessToken = CESIUM_ION_TOKEN || "";
+
+    async function loadTilesets() {
+      const viewer = new Cesium.Viewer("cesiumContainer");
+
+      try {
+        // First tileset
+        const tileset1 = await Cesium.Cesium3DTileset.fromIonAssetId(526667);
+        viewer.scene.primitives.add(tileset1);
+        await viewer.zoomTo(tileset1);
+
+        // Apply the default style if it exists
+        const extras1 = tileset1.asset.extras;
+        if (
+          Cesium.defined(extras1) &&
+          Cesium.defined(extras1.ion) &&
+          Cesium.defined(extras1.ion.defaultStyle)
+        ) {
+          tileset1.style = new Cesium.Cesium3DTileStyle(extras1.ion.defaultStyle);
+        }
+
+        // Second tileset
+        const tileset2 = await Cesium.Cesium3DTileset.fromIonAssetId(526660, {
+          // This tileset doesn't have a location, so we're using a modelMatrix to place it at 0, 0 instead of drawing at the center of the earth
+          modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(
+            Cesium.Cartesian3.fromDegrees(0, 0)
+          ),
+        });
+        viewer.scene.primitives.add(tileset2);
+        await viewer.zoomTo(tileset2);
+
+        // Apply the default style if it exists
+        const extras2 = tileset2.asset.extras;
+        if (
+          Cesium.defined(extras2) &&
+          Cesium.defined(extras2.ion) &&
+          Cesium.defined(extras2.ion.defaultStyle)
+        ) {
+          tileset2.style = new Cesium.Cesium3DTileStyle(extras2.ion.defaultStyle);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    loadTilesets();
+  </script>
+</body>
+</html>

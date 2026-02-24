@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Add a vector tile source</title>
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <script src="./keys.js"></script>
+
+  <body>
+    <div id="map"></div>
+    <script>
+      // TO MAKE THE MAP APPEAR YOU MUST
+      // ADD YOUR ACCESS TOKEN FROM
+      // https://account.mapbox.com
+      mapboxgl.accessToken =
+        MAPBOX_KEY;
+      const map = new mapboxgl.Map({
+        container: "map", // container ID
+        style: {
+          version: 8,
+          sources: {
+            nearmap_tiles: {
+              type: "raster",
+              tiles: [
+                `https://api.nearmap.com/tiles/v3/Vert/{z}/{x}/{y}.jpg?tertiary=satellite&apikey=${NEARMAP_KEY}`,
+              ],
+              tileSize: 256,
+              attribution: "Map Tiles by Nearmap",
+            },
+          },
+          layers: [
+            {
+              id: "nearmap_baselayer",
+              type: "raster",
+              source: "nearmap_tiles",
+              minzoom: 0,
+              maxzoom: 22,
+            },
+          ],
+        },
+        center: [-73.94, 40.76], // starting position
+        zoom: 14, // starting zoom
+      });
+
+      map.on("load", () => {
+        map.addSource("nearmap_vector_test", {
+          type: "vector",
+          // Use any Mapbox-hosted tileset using its tileset id.
+          // Learn more about where to find a tileset id:
+          // https://docs.mapbox.com/help/glossary/tileset-id/
+          url: "mapbox://ctluck.5kh91ffn",
+        });
+        map.setPaintProperty("nearmap_baselayer", "raster-opacity", 0.8);
+
+        map.addLayer({
+          id: "Asphalt",
+          type: "line",
+          source: "nearmap_vector_test",
+          "source-layer": "Asphalt-13uffv",
+          layout: {
+            "line-join": "round",
+            "line-cap": "round",
+          },
+          paint: {
+            "line-color": "#ff69b4",
+            "line-width": 2,
+          },
+        });
+      });
+    </script>
+  </body>
+</html>
