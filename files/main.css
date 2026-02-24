@@ -953,8 +953,11 @@ iframe#viewer {
 	#mobileHomeButton:hover {
 		background-color: var(--color-blue);
 	}
-	#panel.collapsed #header #mobileHomeButton {
-		margin-right: auto;
+	#panel.collapsed #header {
+		justify-content: flex-start;
+	}
+	#panel.collapsed #header #panelToggle {
+		margin-left: auto;
 	}
 	#panel #panelToggle {
 		display: flex !important;
