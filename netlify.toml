@@ -4,6 +4,5 @@
 [build]
   command = "npm run build"
   publish = "."
-  functions = []
 
-# Ensure keys.js is generated before publish (build command runs build-keys.js)
+# keys.js is generated from env vars during build
