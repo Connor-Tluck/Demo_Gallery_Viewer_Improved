@@ -27,5 +27,7 @@ examples/keys.js
 .env
 .env.local
 examples/models/nearmap/sandiego/*
+examples/models/nearmap/nashville/*
+examples/models/nearmap/la/*
 
 **/node_modules
