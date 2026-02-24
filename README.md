@@ -136,17 +136,22 @@ python -m http.server 3000
 
 **Important:** This demo requires API keys for mapping integrations. Never commit real keys to version control.
 
-1. Copy the template file:
-   ```sh
-   cp examples/keys.js.example examples/keys.js
-   ```
+**Netlify deploy:** Set these env vars in the Netlify dashboard – the build generates `keys.js` automatically:
+- `MAPBOX_PUBLIC_TOKEN`, `GOOGLE_MAPS_API_KEY`, `CESIUM_ION_ACCESS_TOKEN`, `NEARMAP_API_KEY`
+
+**Local dev (Option A – .env):**
+1. Copy `.env.example` to `.env` and add your keys.
+2. Run `npm run build` to generate `examples/keys.js`.
+
+**Local dev (Option B – manual):**
+1. Copy the template: `cp examples/keys.js.example examples/keys.js`
 2. Edit `examples/keys.js` and add your keys:
    - **NEARMAP_KEY** – [Nearmap API](https://docs.nearmap.com/display/ND/Work+with+API+Keys)
    - **MAPBOX_KEY** – [Mapbox](https://account.mapbox.com) (public token, `pk.*`)
    - **GOOGLE_KEY** – [Google Maps JavaScript API](https://console.cloud.google.com)
    - **CESIUM_ION_TOKEN** – [Cesium Ion](https://cesium.com/ion/) (for 3D Cesium examples)
 
-3. `keys.js` is in `.gitignore` – it will not be committed.
+`keys.js` is in `.gitignore` – it will not be committed. Missing keys show an error banner in the app.
 
 ### Prerequisites
 

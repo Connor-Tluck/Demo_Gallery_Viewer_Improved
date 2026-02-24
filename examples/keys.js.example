@@ -1,15 +1,20 @@
 /**
  * API Keys Configuration Template
  *
- * Copy this file to keys.js and add your own API keys.
- * NEVER commit keys.js to version control - it is in .gitignore.
+ * Option A (Netlify): Set env vars in Netlify dashboard - MAPBOX_PUBLIC_TOKEN,
+ *   GOOGLE_MAPS_API_KEY, CESIUM_ION_ACCESS_TOKEN, NEARMAP_API_KEY.
+ *   Build generates keys.js automatically.
  *
- * Required keys for the Nearmap Demo Gallery:
+ * Option B (Local .env): Copy .env.example to .env, add keys, run `npm run build`.
  *
- * - NEARMAP_KEY: Get from https://docs.nearmap.com/display/ND/Work+with+API+Keys
- * - MAPBOX_KEY: Get from https://account.mapbox.com (public token, pk.*)
- * - GOOGLE_KEY: Get from https://console.cloud.google.com (Maps JavaScript API)
- * - CESIUM_ION_TOKEN: Get from https://cesium.com/ion/ (for 3D Cesium examples)
+ * Option C (Manual): Copy this file to keys.js and add your keys below.
+ *
+ * NEVER commit keys.js - it is in .gitignore.
+ *
+ * - NEARMAP_KEY: https://docs.nearmap.com/display/ND/Work+with+API+Keys
+ * - MAPBOX_KEY: https://account.mapbox.com (public token, pk.*)
+ * - GOOGLE_KEY: https://console.cloud.google.com (Maps JavaScript API)
+ * - CESIUM_ION_TOKEN: https://cesium.com/ion/ (for 3D Cesium examples)
  */
 var NEARMAP_KEY = "YOUR_NEARMAP_API_KEY";
 var MAPBOX_KEY = "pk.YOUR_MAPBOX_PUBLIC_TOKEN";

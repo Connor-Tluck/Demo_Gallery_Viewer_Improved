@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "scripts": {
     "start": "npx serve -l 3000",
-    "dev": "npx serve -l 3000"
+    "dev": "npx serve -l 3000",
+    "build": "node scripts/build-keys.js"
   },
   "devDependencies": {
+    "dotenv": "^16.3.1",
     "netlify-cli": "^12.1.1"
   }
 }
