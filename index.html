@@ -121,6 +121,13 @@
             </label>
           </div>
           <div class="settings-group">
+            <label class="settings-toggle">
+              <input type="checkbox" id="settingSidebarMinimized" />
+              <span class="settings-toggle-slider"></span>
+              <span class="settings-toggle-label">Minimized sidebar by default</span>
+            </label>
+          </div>
+          <div class="settings-group">
             <div class="settings-group-title">Categories in sidebar</div>
             <div class="settings-toggle-all-row">
               <button type="button" class="settings-toggle-all-btn" id="settingsSelectAll">Select all</button>
@@ -157,6 +164,7 @@
       const settingsPanel = document.getElementById("settingsPanel");
       const settingsCloseButton = document.getElementById("settingsCloseButton");
       const settingSearchBar = document.getElementById("settingSearchBar");
+      const settingSidebarMinimized = document.getElementById("settingSidebarMinimized");
       const settingsCategoryToggles = document.getElementById("settingsCategoryToggles");
       const inputWrapper = document.getElementById("inputWrapper");
       const collapsedStrip = document.getElementById("collapsedStrip");
@@ -191,6 +199,7 @@
       const SETTINGS_KEY = "gallerySettings";
       const DEFAULT_SETTINGS = {
         searchBar: true,
+        sidebarMinimizedByDefault: false,
         categories: {} // populated per-category, true = visible
       };
 
@@ -254,10 +263,12 @@
       function applySettings(files) {
         const s = getSettings();
         const searchBarOn = !s ? true : s.searchBar !== false;
+        const sidebarMinimized = s && s.sidebarMinimizedByDefault === true;
         const categorySettings = getCategorySettings(files);
 
         inputWrapper.style.display = searchBarOn ? "" : "none";
         settingSearchBar.checked = searchBarOn;
+        settingSidebarMinimized.checked = sidebarMinimized;
 
         const headers = container.querySelectorAll("h2[data-category]");
         headers.forEach(function (h2) {
@@ -521,6 +532,16 @@
           saveSettings(s);
           applySettings(files);
         });
+        settingSidebarMinimized.addEventListener("change", function () {
+          const s = getSettings() || { searchBar: true, categories: {} };
+          s.sidebarMinimizedByDefault = settingSidebarMinimized.checked;
+          saveSettings(s);
+          localStorage.setItem("panelCollapsed", settingSidebarMinimized.checked ? "true" : "false");
+          if (window.innerWidth > 640) {
+            panel.classList.toggle("collapsed", settingSidebarMinimized.checked);
+            updatePanelToggleTooltip();
+          }
+        });
 
         document.getElementById("settingsSelectAll").addEventListener("click", function () {
           const s = getSettings() || { searchBar: true, categories: {} };
@@ -541,8 +562,11 @@
 
         if (window.innerWidth <= 640) {
           panel.classList.add("collapsed");
-        } else if (localStorage.getItem("panelCollapsed") === "true") {
-          panel.classList.add("collapsed");
+        } else {
+          const s = getSettings();
+          const useSetting = s && "sidebarMinimizedByDefault" in s;
+          const sidebarMinimized = useSetting ? s.sidebarMinimizedByDefault === true : localStorage.getItem("panelCollapsed") === "true";
+          if (sidebarMinimized) panel.classList.add("collapsed");
         }
 
         updatePanelToggleTooltip();
