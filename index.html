@@ -121,6 +121,10 @@
           </div>
           <div class="settings-group">
             <div class="settings-group-title">Categories in sidebar</div>
+            <div class="settings-toggle-all-row">
+              <button type="button" class="settings-toggle-all-btn" id="settingsSelectAll">Select all</button>
+              <button type="button" class="settings-toggle-all-btn" id="settingsDeselectAll">Deselect all</button>
+            </div>
             <div id="settingsCategoryToggles"></div>
           </div>
         </div>
@@ -270,6 +274,8 @@
         });
       }
 
+      const isIOS = /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
+
       function showHome() {
         selected = null;
         document.body.classList.add("home");
@@ -280,6 +286,7 @@
         viewer.removeAttribute("srcdoc");
         viewer.src = "examples/home.html";
         viewer.style.display = "unset";
+        if (isIOS) viewer.removeAttribute("scrolling");
       }
 
       init();
@@ -505,23 +512,51 @@
           applySettings(files);
         });
 
-        if (localStorage.getItem("panelCollapsed") === "true") {
+        document.getElementById("settingsSelectAll").addEventListener("click", function () {
+          const s = getSettings() || { searchBar: true, categories: {} };
+          s.categories = s.categories || {};
+          for (const key in files) s.categories[key] = true;
+          saveSettings(s);
+          buildSettingsCategoryToggles(files);
+          applySettings(files);
+        });
+        document.getElementById("settingsDeselectAll").addEventListener("click", function () {
+          const s = getSettings() || { searchBar: true, categories: {} };
+          s.categories = s.categories || {};
+          for (const key in files) s.categories[key] = false;
+          saveSettings(s);
+          buildSettingsCategoryToggles(files);
+          applySettings(files);
+        });
+
+        if (window.innerWidth <= 640) {
+          panel.classList.add("collapsed");
+        } else if (localStorage.getItem("panelCollapsed") === "true") {
           panel.classList.add("collapsed");
         }
 
         updatePanelToggleTooltip();
+
+        window.addEventListener("resize", function () {
+          if (window.innerWidth <= 640) {
+            panel.classList.add("collapsed");
+          }
+          updatePanelToggleTooltip();
+        });
 
         previewsToggler.onclick = function (event) {
           event.preventDefault();
           content.classList.toggle("minimal");
         };
 
-        // iOS iframe auto-resize workaround
+        // iOS iframe auto-resize workaround (only for example pages; home page needs scroll)
 
-        if (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) {
+        if (isIOS) {
           viewer.style.width = getComputedStyle(viewer).width;
           viewer.style.height = getComputedStyle(viewer).height;
-          viewer.setAttribute("scrolling", "no");
+          if (!document.body.classList.contains("home")) {
+            viewer.setAttribute("scrolling", "no");
+          }
         }
 
         // Fast tooltip (150ms delay vs ~1s for native title)
@@ -656,6 +691,7 @@
         window.location.hash = file;
         viewer.focus();
         viewer.style.display = "unset";
+        if (isIOS) viewer.setAttribute("scrolling", "no");
 
         panel.classList.remove("open");
 
