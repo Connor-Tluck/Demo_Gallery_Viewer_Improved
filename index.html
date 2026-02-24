@@ -419,7 +419,7 @@
         document.getElementById("mobileHomeButton").addEventListener("click", function (e) {
           e.preventDefault();
           if (window.hideGalleryTooltip) window.hideGalleryTooltip();
-          panel.classList.remove("open");
+          collapsedFlyout.classList.remove("open");
           showHome();
         });
 
@@ -447,13 +447,10 @@
         panelToggle.addEventListener("click", function (event) {
           event.preventDefault();
           if (window.hideGalleryTooltip) window.hideGalleryTooltip();
-          if (window.innerWidth <= 640) {
-            panel.classList.toggle("open");
-          } else {
-            panel.classList.toggle("collapsed");
-            localStorage.setItem("panelCollapsed", panel.classList.contains("collapsed"));
-            if (!panel.classList.contains("collapsed")) collapsedFlyout.classList.remove("open");
-          }
+          if (window.innerWidth <= 640) return;
+          panel.classList.toggle("collapsed");
+          localStorage.setItem("panelCollapsed", panel.classList.contains("collapsed"));
+          if (!panel.classList.contains("collapsed")) collapsedFlyout.classList.remove("open");
           updatePanelToggleTooltip();
         });
 
@@ -514,7 +511,9 @@
 
         panelScrim.onclick = function (event) {
           event.preventDefault();
-          panel.classList.toggle("open");
+          if (window.innerWidth > 640) {
+            panel.classList.toggle("open");
+          }
         };
 
         settingsButton.addEventListener("click", function (e) {
@@ -574,6 +573,7 @@
         window.addEventListener("resize", function () {
           if (window.innerWidth <= 640) {
             panel.classList.add("collapsed");
+            panel.classList.remove("open");
           }
           updatePanelToggleTooltip();
         });
@@ -726,7 +726,7 @@
         // Allow iframe to scroll - scrolling="no" was blocking scroll on mobile
         if (isIOS) viewer.removeAttribute("scrolling");
 
-        panel.classList.remove("open");
+        collapsedFlyout.classList.remove("open");
 
         selected = file;
 

@@ -947,6 +947,38 @@ iframe#viewer {
 		grid-template-columns: repeat(2, 1fr);
 	}
 
+	/* --- Panel: header-height only, never blocks content below --- */
+	#panel,
+	#panel.collapsed {
+		position: fixed;
+		left: 0;
+		top: 0;
+		width: 100% !important;
+		min-width: 100% !important;
+		height: var(--header-height);
+		z-index: 1000;
+		overflow: visible;
+		border: none;
+		background: var(--background-color);
+		pointer-events: none;
+	}
+	#panel #header {
+		pointer-events: auto;
+		background: var(--background-color);
+		padding-left: 12px;
+	}
+	#panel #header h1 {
+		padding-left: 8px;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	#panel #sections * {
+		padding: 0 8px;
+	}
+
+	/* Home button visible on mobile */
 	#mobileHomeButton {
 		display: flex !important;
 		width: 36px;
@@ -966,125 +998,57 @@ iframe#viewer {
 		mask-repeat: no-repeat;
 		align-items: center;
 		justify-content: center;
-		transition: background-color 0.15s;
 	}
-	#mobileHomeButton:hover {
-		background-color: var(--color-blue);
-	}
-	#panel.collapsed #header {
-		justify-content: flex-start;
-	}
-	#panel.collapsed #header #panelToggle {
-		margin-left: auto;
-	}
-	#panel #panelToggle {
-		display: flex !important;
-		margin-right: 6px;
-	}
-	#panel #settingsButton {
-		display: flex !important;
-		margin-right: 2px;
-	}
-	#panel #header h1 {
-		padding-left: 12px;
-		min-width: 0;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-	#panel #sections * {
-		padding: 0 8px;
-	}
-	#panel.collapsed:not(.open) #collapsedStrip {
+
+	/* Hide panelToggle on mobile — strip is always visible */
+	#panel #panelToggle,
+	#panel.collapsed #panelToggle {
 		display: none !important;
 	}
-	#panel.open #collapsedStrip {
+
+	/* Settings button stays visible */
+	#panel #settingsButton {
 		display: flex !important;
-		position: absolute;
+		margin-right: 6px;
+		pointer-events: auto;
+	}
+
+	/* --- Collapsed strip: always visible on right --- */
+	#collapsedStrip,
+	#panel.collapsed #collapsedStrip,
+	#panel.collapsed:not(.open) #collapsedStrip {
+		display: flex !important;
+		position: fixed;
 		right: 0;
 		top: var(--header-height);
 		bottom: 0;
 		width: var(--panel-collapsed-width);
 		min-width: var(--panel-collapsed-width);
-		flex-shrink: 0;
 		background: var(--background-color);
 		border-left: var(--border-style);
 		z-index: 1001;
 		pointer-events: auto;
-	}
-	#panel.open #contentWrapper {
-		display: none !important;
-	}
-	#panel.collapsed {
-		width: 100% !important;
-		min-width: 100% !important;
-	}
-	#panel.collapsed ~ #viewer {
-		padding-left: 0 !important;
-	}
-	#panel {
-		position: absolute;
-		left: 0;
-		top: 0;
-		width: 100%;
-		right: 0;
-		z-index: 1000;
-		overflow: hidden;
-		transition: 0s 0s height;
-		border: none;
-		height: var(--header-height);
-		transition: 0s 0.2s height;
-	}
-	#panel.open {
-		height: 100%;
-		transition: 0s 0s height;
-		/* Transparent so viewer shows through; header and strip have own backgrounds */
-		background: transparent;
+		flex-direction: column;
+		overflow-y: auto;
 	}
 
-	#panelScrim {
-		pointer-events: none;
-		background-color: rgba(0,0,0,0);
-		position: absolute;
-		left: 0;
-		right: 0;
-		top: 0;
-		bottom: 0;
-		z-index: 1000;
-		pointer-events: none;
-		transition: .2s background-color;
-	}
-	#panel.open #panelScrim {
-		pointer-events: auto;
-		background-color: transparent;
-	}
-
+	/* --- Content wrapper: hidden on mobile (use strip + flyout) --- */
 	#contentWrapper {
-		position: absolute;
-		right: 0;
-		top: 0;
-		bottom: 0;
-		background: var(--background-color);
-		box-shadow: 0 0 8px rgba(0,0,0,.1);
-		width: calc(100vw - 60px);
-		max-width: 360px;
-		z-index: 10000;
-		transition: .25s transform;
-		overflow-x: hidden;
-		transform: translate3d(100%, 0, 0);
-		line-height: 2rem;
-	}
-	#panel.open #contentWrapper {
 		display: none !important;
 	}
-	/* Mobile: viewer always starts at left:0 (override desktop collapsed rule) */
+
+	/* --- Scrim: disabled on mobile --- */
+	#panelScrim {
+		display: none !important;
+	}
+
+	/* --- Viewer: always offset for header (top) and strip (right) --- */
 	#viewerWrapper,
-	#panel.collapsed ~ #viewerWrapper,
-	#panel.open ~ #viewerWrapper {
+	#panel.collapsed ~ #viewerWrapper {
 		left: 0;
-		right: 0;
+		right: var(--panel-collapsed-width);
 		top: var(--header-height);
-		width: 100%;
+		width: auto;
 		height: calc(100% - var(--header-height));
 		padding-left: 0;
 		overflow-y: scroll;
@@ -1092,17 +1056,6 @@ iframe#viewer {
 		-webkit-overflow-scrolling: touch;
 		touch-action: pan-y;
 		overscroll-behavior-y: contain;
-		transition: right 0.25s ease;
-	}
-	/* Sidebar open: reserve right 56px for strip, content stays visible */
-	#panel.open ~ #viewerWrapper {
-		right: var(--panel-collapsed-width);
-		left: 0;
-	}
-	/* Flyout open: reserve right 316px (strip + flyout), keep left: 0 */
-	#panel.collapsed:has(#collapsedFlyout.open) ~ #viewerWrapper {
-		left: 0;
-		right: calc(var(--panel-collapsed-width) + 260px);
 	}
 	#viewer,
 	iframe {
@@ -1115,15 +1068,27 @@ iframe#viewer {
 		padding-left: 0;
 	}
 
+	/* --- Flyout: opens left of strip --- */
+	#collapsedFlyout {
+		pointer-events: auto;
+	}
 	#collapsedFlyout.open {
 		z-index: 1001;
+		position: fixed;
+		top: var(--header-height);
+		bottom: 0;
 		right: var(--panel-collapsed-width);
 		left: auto;
 		border-left: var(--border-style);
 		border-right: none;
 		box-shadow: -4px 0 12px rgba(0,0,0,0.08);
 	}
+	#panel.collapsed:has(#collapsedFlyout.open) ~ #viewerWrapper {
+		left: 0;
+		right: calc(var(--panel-collapsed-width) + 260px);
+	}
 
+	/* --- Settings panel: full-screen overlay --- */
 	#settingsPanel.open {
 		position: fixed;
 		top: 0;
@@ -1131,5 +1096,6 @@ iframe#viewer {
 		right: 0;
 		bottom: 0;
 		z-index: 10001;
+		pointer-events: auto;
 	}
 }
