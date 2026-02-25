@@ -200,21 +200,21 @@
           <div class="gltf-cell-header">Red Rocks</div>
           <div class="gltf-cell-viewport">
             <div class="gltf-cell-overlay">Click to interact</div>
-            <iframe src="obj_gltf_mesh_8.html" title="Red Rocks"></iframe>
+            <iframe data-src="obj_gltf_mesh_8.html" title="Red Rocks"></iframe>
           </div>
         </div>
         <div class="gltf-cell" data-cell>
           <div class="gltf-cell-header">Fenway</div>
           <div class="gltf-cell-viewport">
             <div class="gltf-cell-overlay">Click to interact</div>
-            <iframe src="obj_gltf_mesh_10.html" title="Fenway"></iframe>
+            <iframe data-src="obj_gltf_mesh_10.html" title="Fenway"></iframe>
           </div>
         </div>
         <div class="gltf-cell" data-cell>
           <div class="gltf-cell-header">Hartford</div>
           <div class="gltf-cell-viewport">
             <div class="gltf-cell-overlay">Click to interact</div>
-            <iframe src="obj_gltf_mesh_2.html" title="Hartford"></iframe>
+            <iframe data-src="obj_gltf_mesh_2.html" title="Hartford"></iframe>
           </div>
         </div>
       </div>
@@ -302,6 +302,16 @@
     </div>
   <script>
     (function() {
+      var meshIframesLoaded = false;
+      function loadMeshIframes() {
+        if (meshIframesLoaded) return;
+        meshIframesLoaded = true;
+        var iframes = document.querySelectorAll('#gltfGrid iframe[data-src]');
+        iframes.forEach(function(iframe) {
+          iframe.src = iframe.getAttribute('data-src');
+        });
+      }
+
       window.addEventListener("message", function (e) {
         var section = document.getElementById("tryItSection");
         if (!section) return;
@@ -310,6 +320,7 @@
         }
         if (e.data && e.data.type === "showHomeContent") {
           section.style.display = 'block';
+          loadMeshIframes();
         }
       });
 

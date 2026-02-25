@@ -252,6 +252,8 @@
       const collapsedFlyoutTitle = document.getElementById("collapsedFlyoutTitle");
       const collapsedFlyoutList = document.getElementById("collapsedFlyoutList");
       const categoryFiles = {};
+      var _meshTimer = null;
+      var _meshObserver = null;
       const viewSrcButton = document.getElementById("button");
       const panelScrim = document.getElementById("panelScrim");
       const previewsToggler = document.getElementById("previewsToggler");
@@ -644,6 +646,10 @@
             }
           }
           if (e.data && e.data.type === "meshLoadTime") {
+            if (_meshTimer && !_meshTimer.reported) {
+              _meshTimer.reported = true;
+              if (_meshObserver) { _meshObserver.disconnect(); _meshObserver = null; }
+            }
             ldTrack("mesh-load-time", {
               mesh: e.data.mesh,
               meshId: e.data.meshId,
@@ -651,6 +657,35 @@
               loadTimeMs: e.data.loadTimeMs
             }, e.data.loadTimeMs);
           }
+        });
+
+        viewer.addEventListener("load", function () {
+          if (!_meshTimer || _meshTimer.reported) return;
+          var tracker = _meshTimer;
+          try {
+            var doc = viewer.contentDocument;
+            if (!doc || !doc.body) return;
+            var seen = false;
+            _meshObserver = new MutationObserver(function () {
+              if (!tracker || tracker.reported) { _meshObserver.disconnect(); _meshObserver = null; return; }
+              var overlay = doc.getElementById("mesh-loading-overlay");
+              if (overlay) seen = true;
+              if (seen && !overlay) {
+                _meshObserver.disconnect();
+                _meshObserver = null;
+                if (!tracker.reported) {
+                  tracker.reported = true;
+                  var elapsed = Date.now() - tracker.start;
+                  ldTrack("mesh-load-time", {
+                    meshId: tracker.file,
+                    loadTimeMs: elapsed,
+                    meshType: /^(obj_mesh|nearmap_collada)/.test(tracker.file) ? "obj" : "gltf"
+                  }, elapsed);
+                }
+              }
+            });
+            _meshObserver.observe(doc.documentElement, { childList: true, subtree: true });
+          } catch (e) {}
         });
 
         function updatePanelToggleTooltip() {
@@ -1038,6 +1073,12 @@
       function selectFile(file) {
         document.body.classList.remove("home");
         ldTrack("page-view-demo", { page: file, category: getCategoryForFile(file) });
+
+        if (_meshObserver) { _meshObserver.disconnect(); _meshObserver = null; }
+        _meshTimer = /^(obj_gltf_mesh|obj_mesh|nearmap_collada)/.test(file)
+          ? { file: file, start: Date.now(), reported: false }
+          : null;
+
         if (selected !== null) links[selected].classList.remove("selected");
 
         links[file].classList.add("selected");
