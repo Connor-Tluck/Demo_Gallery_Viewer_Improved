@@ -24,6 +24,7 @@ test/treeshake/index.bundle.min.js
 test/treeshake/index-src.bundle.min.js
 test/treeshake/stats.html
 examples/keys.js
+files/ld-bundle.js
 .env
 .env.local
 examples/models/nearmap/sandiego/*

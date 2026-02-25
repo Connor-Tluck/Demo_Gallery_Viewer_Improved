@@ -1,12 +1,14 @@
 /**
  * Creates a loading overlay with progress bar for mesh loading.
  * Call show() before load, updateProgress(loaded, total) during load, hide() when done.
+ * Automatically tracks load time and reports it to the parent frame via postMessage.
  * @param {Object} [options] - Optional configuration
  * @param {boolean} [options.isNonGltf] - If true, shows warning that OBJ/non-GLTF formats load slower than GLTF
  * @param {boolean} [options.isLargeFile] - If true, shows warning that this is a large file and will take time to load
  */
 export function createMeshLoadingOverlay(options = {}) {
   const { isNonGltf = false, isLargeFile = false } = options;
+  let loadStartTime = null;
   const warnings = [];
   if (isNonGltf) warnings.push('OBJ and other non-GLTF formats load slower than GLTF examples.');
   if (isLargeFile) warnings.push('This is a large file and will take some time to load.');
@@ -55,9 +57,24 @@ export function createMeshLoadingOverlay(options = {}) {
   style.textContent = '@keyframes mesh-spin { to { transform: rotate(360deg); } }';
   document.head.appendChild(style);
 
+  function reportLoadTime() {
+    if (loadStartTime == null || window.self === window.top) return;
+    const elapsed = Date.now() - loadStartTime;
+    const pageFile = window.location.pathname.split('/').pop().replace('.html', '');
+    try {
+      window.parent.postMessage({
+        type: 'meshLoadTime',
+        mesh: document.title || pageFile,
+        meshId: pageFile,
+        meshType: isNonGltf ? 'obj' : 'gltf',
+        loadTimeMs: elapsed
+      }, '*');
+    } catch (_) {}
+  }
+
   return {
-    show: () => { document.body.appendChild(overlay); },
-    hide: () => { overlay.remove(); },
+    show: () => { loadStartTime = Date.now(); document.body.appendChild(overlay); },
+    hide: () => { reportLoadTime(); overlay.remove(); },
     updateProgress: (loaded, total) => {
       const pct = total ? Math.min(100, (loaded / total) * 100) : 0;
       progressBar.style.width = pct + '%';

@@ -511,6 +511,7 @@ async function startLoad(idx) {
   const c = cells[idx];
   c.state = 'loading';
   loadingCount++;
+  const loadStartTime = performance.now();
 
   const wrap = document.getElementById(`wrap-${idx}`);
   const loadingEl = document.getElementById(`loading-${idx}`);
@@ -558,6 +559,14 @@ async function startLoad(idx) {
     } else {
       await loadOBJ(c, sd, loadingEl, progressBar);
     }
+    const loadTimeMs = Math.round(performance.now() - loadStartTime);
+    window.parent.postMessage({
+      type: 'meshLoadTime',
+      mesh: c.mesh.name,
+      meshId: c.mesh.id,
+      meshType: c.mesh.type,
+      loadTimeMs
+    }, '*');
   } catch (err) {
     console.warn(`Failed to load ${c.mesh.name}:`, err);
     loadingEl.innerHTML = '<div class="mesh-error">Failed to load mesh</div>';

@@ -478,6 +478,57 @@ iframe#viewer {
 #panel.collapsed #collapsedStrip {
 	display: flex;
 }
+
+#collapsedHomeButton {
+	width: 40px;
+	height: 40px;
+	min-height: 40px;
+	margin: 4px auto 12px;
+	cursor: pointer;
+	background-color: var(--text-color);
+	-webkit-mask-image: url(../files/ic_home_black_24dp.svg);
+	-webkit-mask-size: 22px;
+	-webkit-mask-position: 50% 50%;
+	-webkit-mask-repeat: no-repeat;
+	mask-image: url(../files/ic_home_black_24dp.svg);
+	mask-size: 22px;
+	mask-position: 50% 50%;
+	mask-repeat: no-repeat;
+	border-radius: 8px;
+	transition: background-color 0.15s;
+	flex-shrink: 0;
+}
+#collapsedHomeButton:hover {
+	background-color: var(--color-blue);
+}
+#collapsedHomeDivider {
+	width: 36px;
+	margin: 0 auto 6px;
+	border-bottom: var(--border-style);
+	flex-shrink: 0;
+}
+#collapsedSettingsButton {
+	width: 40px;
+	height: 40px;
+	min-height: 40px;
+	margin: 0 auto 8px;
+	cursor: pointer;
+	background-color: var(--text-color);
+	-webkit-mask-image: url(../files/ic_settings_black_24dp.svg);
+	-webkit-mask-size: 22px;
+	-webkit-mask-position: 50% 50%;
+	-webkit-mask-repeat: no-repeat;
+	mask-image: url(../files/ic_settings_black_24dp.svg);
+	mask-size: 22px;
+	mask-position: 50% 50%;
+	mask-repeat: no-repeat;
+	border-radius: 8px;
+	transition: background-color 0.15s;
+	flex-shrink: 0;
+}
+#collapsedSettingsButton:hover {
+	background-color: var(--color-blue);
+}
 #panel.collapsed #contentWrapper {
 	display: none !important;
 }
@@ -624,6 +675,17 @@ iframe#viewer {
 #settingsPanel.open {
 	display: flex;
 }
+#panel.collapsed #settingsPanel.open {
+	position: fixed;
+	left: var(--panel-collapsed-width);
+	top: 0;
+	bottom: 0;
+	width: 280px;
+	right: auto;
+	border-right: var(--border-style);
+	box-shadow: 4px 0 12px rgba(0,0,0,0.08);
+	z-index: 1001;
+}
 #settingsPanelHeader {
 	display: flex;
 	align-items: center;
@@ -672,6 +734,22 @@ iframe#viewer {
 	margin-bottom: 12px;
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
+}
+#ldControlNoticeInner {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 12px 14px;
+	border-radius: 8px;
+	background: var(--panel-color);
+	border: 1px solid var(--border-color);
+	color: var(--secondary-text-color);
+	font-size: calc(var(--font-size) - 1px);
+	line-height: 1.45;
+	margin-bottom: 4px;
+}
+#ldControlNoticeInner strong {
+	color: var(--text-color);
 }
 .settings-toggle-all-row {
 	display: flex;
@@ -1025,6 +1103,13 @@ iframe#viewer {
 		display: flex !important;
 		margin-right: 6px;
 		pointer-events: auto;
+	}
+
+	/* Home/settings buttons hidden on mobile - header handles them */
+	#collapsedHomeButton,
+	#collapsedHomeDivider,
+	#collapsedSettingsButton {
+		display: none !important;
 	}
 
 	/* --- Collapsed strip: always visible on right --- */

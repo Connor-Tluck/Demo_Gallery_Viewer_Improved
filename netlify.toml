@@ -1,5 +1,5 @@
 # Netlify build configuration
-# API keys: Set MAPBOX_PUBLIC_TOKEN, GOOGLE_MAPS_API_KEY, CESIUM_ION_ACCESS_TOKEN, NEARMAP_API_KEY in Netlify env vars
+# API keys: Set MAPBOX_PUBLIC_TOKEN, GOOGLE_MAPS_API_KEY, CESIUM_ION_ACCESS_TOKEN, NEARMAP_API_KEY, LAUNCHDARKLY_CLIENT_ID in Netlify env vars
 
 [build]
   command = "npm run build"

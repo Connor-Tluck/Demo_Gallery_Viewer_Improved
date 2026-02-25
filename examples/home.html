@@ -168,6 +168,7 @@
     }
     /* Mobile scroll fix when in gallery iframe - enables touch scrolling on iOS */
     html, body { -webkit-overflow-scrolling: touch; }
+    #tryItSection { display: none; }
   </style>
 </head>
 <body>
@@ -189,7 +190,7 @@
       </p>
     </div>
 
-    <div class="home-section">
+    <div class="home-section" id="tryItSection">
       <h2>Try It — Interactive 3D Meshes</h2>
       <p style="margin-bottom: 8px; font-size: 0.9375rem;">
         Click a viewer to rotate and zoom; click outside or scroll in the margin to continue down the page.
@@ -301,6 +302,17 @@
     </div>
   <script>
     (function() {
+      window.addEventListener("message", function (e) {
+        var section = document.getElementById("tryItSection");
+        if (!section) return;
+        if (e.data && e.data.type === "hideHomeContent") {
+          section.style.display = 'none';
+        }
+        if (e.data && e.data.type === "showHomeContent") {
+          section.style.display = 'block';
+        }
+      });
+
       var cells = document.querySelectorAll('[data-cell]');
       document.addEventListener('click', function(e) {
         var inCell = e.target.closest('[data-cell]');
