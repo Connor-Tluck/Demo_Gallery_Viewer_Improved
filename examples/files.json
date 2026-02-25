@@ -127,6 +127,7 @@
   ],
 
   "Archived": [
+    "mesh_browser",
     "nearmap_arcgis_digital_twin_demo",
     "nearmap_vector_AI_gen_3",
     "nearmap_arcgis_pro_video_rendering_multiview",

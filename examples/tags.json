@@ -48,6 +48,7 @@
 	"nearmap_cesium_3d_integration_new_york": ["nearmap", "cesium", "3D", "integration", "New", "York", "Cesium"],
 	"nearmap_cesium_3d_integration_new_york_highway": ["nearmap", "cesium", "3D", "integration", "New", "York", "highway", "Cesium"],
 	"nearmap_google_maps_tile_integration": ["nearmap", "google", "maps", "tile", "integration", "Google", "Maps"],
+	"mesh_browser": ["mesh", "browser", "gallery", "3D", "GLTF", "OBJ", "all", "grid", "viewer"],
 	"obj_gltf_mesh_1": ["obj", "gltf", "mesh", "1", "3D", "GLTF", "Mesh", "Sample", "Area"],
 	"obj_gltf_mesh_2": ["obj", "gltf", "mesh", "2", "3D", "GLTF", "Mesh", "Sample", "Area"],
 	"obj_gltf_mesh_3": ["obj", "gltf", "mesh", "3", "3D", "GLTF", "Mesh", "Sample", "Area"],

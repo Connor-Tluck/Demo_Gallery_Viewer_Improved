@@ -50,6 +50,7 @@
   "nearmap_cesium_3d_integration_new_york": "NYC 3D visualization with Nearmap and Cesium.",
   "nearmap_cesium_3d_integration_new_york_highway": "New York highway corridor in 3D with Cesium.",
   "nearmap_google_maps_tile_integration": "Nearmap tiles integrated as overlay in Google Maps.",
+  "mesh_browser": "Browse all Nearmap 3D meshes in a live interactive 2-column grid.",
   "obj_gltf_mesh_1": "3D mesh sample area 1 - interactive GLTF mesh viewer.",
   "obj_gltf_mesh_2": "3D mesh sample area 2 - Hartford area mesh visualization.",
   "obj_gltf_mesh_3": "3D mesh sample area 3 - interactive mesh viewer.",

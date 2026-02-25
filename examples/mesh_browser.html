@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Mesh Browser - Nearmap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="../files/main.css">
+  <style>
+    html, body {
+      height: 100%;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .page-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--background-color);
+      padding: 16px 24px;
+      border-bottom: var(--border-style);
+    }
+    .page-header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--color-blue);
+      margin: 0;
+    }
+    .page-header p {
+      font-size: 13px;
+      color: var(--secondary-text-color);
+      margin-top: 4px;
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .mesh-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding: 20px 24px 40px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 700px) {
+      .mesh-grid { grid-template-columns: 1fr; padding: 12px; gap: 12px; }
+      .page-header { padding: 12px 16px; }
+    }
+
+    .mesh-cell {
+      background: var(--secondary-background-color);
+      border-radius: 6px;
+      overflow: hidden;
+      border: var(--border-style);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      position: relative;
+    }
+    .mesh-cell:hover {
+      box-shadow: 0 0 0 2px var(--color-blue);
+    }
+
+    .mesh-canvas-wrap {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      background: var(--background-color);
+      position: relative;
+      overflow: hidden;
+    }
+    .mesh-canvas-wrap canvas,
+    .mesh-canvas-wrap img.mesh-snapshot {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    img.mesh-snapshot {
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    .mesh-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--background-color);
+      z-index: 2;
+      transition: opacity 0.4s;
+    }
+    .mesh-loading.hidden { opacity: 0; pointer-events: none; }
+
+    .mesh-spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--secondary-text-color);
+      border-top-color: var(--color-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .mesh-loading-text {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--secondary-text-color);
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .mesh-progress {
+      width: 120px;
+      height: 3px;
+      background: var(--secondary-background-color);
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .mesh-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--color-blue);
+      border-radius: 2px;
+      transition: width 0.2s;
+    }
+
+    .mesh-info {
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: var(--border-style);
+      background: var(--secondary-background-color);
+    }
+    .mesh-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-color);
+      font-family: 'Roboto Mono', monospace;
+    }
+    .mesh-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(4,158,244,0.12);
+      color: var(--color-blue);
+      font-weight: 500;
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .mesh-error {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--background-color);
+      color: var(--secondary-text-color);
+      font-size: 13px;
+      z-index: 2;
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .mesh-hint {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      font-size: 11px;
+      color: var(--secondary-text-color);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+      font-family: 'Roboto Mono', monospace;
+    }
+    .mesh-cell:hover .mesh-hint { opacity: 1; }
+
+    .wip-banner {
+      background: rgba(4, 158, 244, 0.1);
+      border: 2px dashed var(--color-blue);
+      border-radius: 8px;
+      padding: 16px 24px;
+      margin: 20px 24px 0;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-family: 'Roboto Mono', monospace;
+    }
+    .wip-icon {
+      font-size: 28px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .wip-text strong {
+      display: block;
+      font-size: 14px;
+      color: var(--color-blue);
+      margin-bottom: 4px;
+    }
+    .wip-text span {
+      font-size: 12px;
+      color: var(--secondary-text-color);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Mesh Browser</h1>
+  <p>Interactive gallery of all Nearmap 3D meshes &mdash; click any mesh to open its full viewer</p>
+</div>
+
+<div class="wip-banner">
+  <div class="wip-icon">&#9888;</div>
+  <div class="wip-text">
+    <strong>Work in Progress</strong>
+    <span>This page is under active development. Performance, loading behavior, and visual quality are still being improved. Some meshes may load slowly or display rendering artifacts.</span>
+  </div>
+</div>
+
+<div class="mesh-grid" id="meshGrid"></div>
+
+<script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "../build/three.module.js",
+    "three/addons/": "./jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from './jsm/environments/RoomEnvironment.js';
+import { OrbitControls } from './jsm/controls/OrbitControls.js';
+import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+import { KTX2Loader } from './jsm/loaders/KTX2Loader.js';
+
+const MESHES = [
+  { id: 'obj_gltf_mesh_1',  name: 'Kew Gardens',           path: 'https://d3e0kl50ei6ri7.cloudfront.net/kew_gardens/', file: 'kew_gardens.glb', type: 'gltf' },
+  { id: 'obj_gltf_mesh_2',  name: 'Hartford',              path: 'https://d3e0kl50ei6ri7.cloudfront.net/',              file: 'hartford.glb',     type: 'gltf' },
+  { id: 'obj_gltf_mesh_3',  name: 'Chicago',               path: 'https://d3e0kl50ei6ri7.cloudfront.net/chicago/',      file: 'chicago.glb',      type: 'gltf' },
+  { id: 'obj_gltf_mesh_4',  name: 'DisneyWorld',           path: 'https://d3e0kl50ei6ri7.cloudfront.net/disney/',       file: 'disney.glb',       type: 'gltf' },
+  { id: 'obj_gltf_mesh_5',  name: 'City Scene',            path: 'https://d3e0kl50ei6ri7.cloudfront.net/chicago/',      file: 'chicago_mesh_large_zero_elevation.glb', type: 'gltf' },
+  { id: 'obj_gltf_mesh_6',  name: 'Griffith Observatory',  path: 'https://d3e0kl50ei6ri7.cloudfront.net/la/',           file: 'observatory.glb',  type: 'gltf' },
+  { id: 'obj_gltf_mesh_7',  name: 'California',            path: 'https://d3e0kl50ei6ri7.cloudfront.net/la/',           file: 'urban_mesh.glb',   type: 'gltf' },
+  { id: 'obj_gltf_mesh_8',  name: 'Red Rocks',             path: 'https://d3e0kl50ei6ri7.cloudfront.net/denver/',       file: 'red_rocks.glb',    type: 'gltf' },
+  { id: 'obj_gltf_mesh_9',  name: 'Nashville',             path: 'https://d3e0kl50ei6ri7.cloudfront.net/nashville/',    file: 'nashville.glb',    type: 'gltf' },
+  { id: 'obj_gltf_mesh_10', name: 'Fenway',                path: 'https://d3e0kl50ei6ri7.cloudfront.net/boston/',        file: 'boston.glb',        type: 'gltf' },
+  { id: 'obj_gltf_mesh_11', name: 'San Diego',             path: 'https://d3e0kl50ei6ri7.cloudfront.net/sandiego/',     file: 'sandiego_1.glb',   type: 'gltf' },
+  { id: 'obj_gltf_mesh_12', name: 'Kew Gardens (GLTF)',    path: 'https://d3e0kl50ei6ri7.cloudfront.net/kew_gardens/',  file: 'kew_gardens.glb',  type: 'gltf' },
+  { id: 'obj_mesh_hartford', name: 'Hartford (OBJ)',       path: 'https://d3e0kl50ei6ri7.cloudfront.net/hartford/Mesh/', file: 'Mesh',             type: 'obj' },
+  { id: 'obj_mesh_liberty',  name: 'Liberty (OBJ)',        path: 'https://d3e0kl50ei6ri7.cloudfront.net/nyc/Mesh/',      file: 'Mesh',             type: 'obj' },
+  { id: 'obj_mesh_sofi',     name: 'SoFi Stadium (OBJ)',   path: 'https://d3e0kl50ei6ri7.cloudfront.net/sofi/Mesh/',     file: 'Mesh',             type: 'obj' }
+];
+
+const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+const sceneBg = isDark ? 0x222222 : 0xffffff;
+
+// Browsers cap WebGL contexts at ~8-16. We keep a hard limit and snapshot
+// the canvas to a static <img> before releasing the GL context so the user
+// still sees the last rendered frame instead of a blank/reload.
+const MAX_GL_CONTEXTS = 6;
+const CONCURRENT_LOADS = 2;
+
+const grid = document.getElementById('meshGrid');
+const cells = [];       // per-cell bookkeeping
+const liveContexts = new Map(); // idx -> sceneData (has a live WebGL context)
+const visibleSet = new Set();   // indices currently in viewport
+const loadQueue = [];
+let loadingCount = 0;
+
+// Shared environment texture - created once with the first renderer, reused
+let sharedEnvTexture = null;
+
+MESHES.forEach((mesh, idx) => {
+  const cell = document.createElement('div');
+  cell.className = 'mesh-cell';
+  cell.innerHTML = `
+    <div class="mesh-canvas-wrap" id="wrap-${idx}">
+      <div class="mesh-loading" id="loading-${idx}">
+        <div class="mesh-spinner"></div>
+        <div class="mesh-loading-text">Loading mesh...</div>
+        <div class="mesh-progress"><div class="mesh-progress-bar" id="progress-${idx}"></div></div>
+      </div>
+      <div class="mesh-hint">Click to open full viewer</div>
+    </div>
+    <div class="mesh-info">
+      <span class="mesh-name">${mesh.name}</span>
+      <span class="mesh-badge">${mesh.type === 'gltf' ? 'GLTF' : 'OBJ'}</span>
+    </div>`;
+
+  cell.addEventListener('click', () => {
+    window.parent.postMessage({ type: 'galleryNavigate', hash: mesh.id }, '*');
+  });
+
+  grid.appendChild(cell);
+  cells.push({
+    el: cell, mesh, idx,
+    state: 'idle',     // idle | queued | loading | ready | snapshotted
+    sceneData: null,   // THREE objects (scene, camera, controls, model root)
+    renderer: null,    // live WebGL renderer (null when snapshotted)
+    snapshot: null      // <img> element with last frame
+  });
+});
+
+// --- Intersection Observer: track visibility, trigger load queue ---
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    const idx = parseInt(entry.target.id.replace('wrap-', ''));
+    if (entry.isIntersecting) {
+      visibleSet.add(idx);
+      onCellVisible(idx);
+    } else {
+      visibleSet.delete(idx);
+    }
+  });
+}, { rootMargin: '300px 0px' });
+
+cells.forEach(c => observer.observe(document.getElementById(`wrap-${c.idx}`)));
+
+function onCellVisible(idx) {
+  const c = cells[idx];
+  if (c.state === 'idle') {
+    c.state = 'queued';
+    loadQueue.push(idx);
+    drainQueue();
+  } else if (c.state === 'snapshotted') {
+    restoreContext(idx);
+  }
+}
+
+// --- Load queue: only N meshes downloading concurrently ---
+function drainQueue() {
+  while (loadingCount < CONCURRENT_LOADS && loadQueue.length > 0) {
+    const idx = loadQueue.shift();
+    if (!visibleSet.has(idx) && cells[idx].state === 'queued') {
+      loadQueue.push(idx);
+      if (loadQueue.every(i => !visibleSet.has(i))) break;
+      continue;
+    }
+    startLoad(idx);
+  }
+}
+
+// --- Single shared RAF loop renders only visible live contexts ---
+let rafId = null;
+function sharedLoop() {
+  rafId = requestAnimationFrame(sharedLoop);
+  for (const [idx, sd] of liveContexts) {
+    if (!visibleSet.has(idx)) continue;
+    if (!sd.modelReady) continue;
+    sd.controls.update();
+    sd.renderer.render(sd.scene, sd.camera);
+  }
+}
+rafId = requestAnimationFrame(sharedLoop);
+
+// --- Context management: snapshot oldest context when over limit ---
+function ensureContextSlot() {
+  if (liveContexts.size < MAX_GL_CONTEXTS) return;
+  // Find the oldest live context that is NOT visible
+  let victim = null;
+  let oldestTime = Infinity;
+  for (const [idx, sd] of liveContexts) {
+    if (visibleSet.has(idx)) continue;
+    if (sd.lastRendered < oldestTime) {
+      oldestTime = sd.lastRendered;
+      victim = idx;
+    }
+  }
+  // If all are visible, pick the absolute oldest
+  if (victim === null) {
+    for (const [idx, sd] of liveContexts) {
+      if (sd.lastRendered < oldestTime) {
+        oldestTime = sd.lastRendered;
+        victim = idx;
+      }
+    }
+  }
+  if (victim !== null) snapshotAndRelease(victim);
+}
+
+function snapshotAndRelease(idx) {
+  const c = cells[idx];
+  const sd = liveContexts.get(idx);
+  if (!sd) return;
+  const wrap = document.getElementById(`wrap-${idx}`);
+
+  // Render one final frame for the snapshot
+  sd.controls.update();
+  sd.renderer.render(sd.scene, sd.camera);
+
+  // Capture canvas to <img>
+  const dataUrl = sd.renderer.domElement.toDataURL('image/jpeg', 0.85);
+  let img = c.snapshot;
+  if (!img) {
+    img = document.createElement('img');
+    img.className = 'mesh-snapshot';
+    c.snapshot = img;
+  }
+  img.src = dataUrl;
+  wrap.appendChild(img);
+
+  // Release WebGL context but keep THREE scene/camera/controls in memory
+  sd.controls.dispose();
+  sd.renderer.dispose();
+  sd.renderer.forceContextLoss();
+  if (sd.renderer.domElement.parentNode) {
+    sd.renderer.domElement.parentNode.removeChild(sd.renderer.domElement);
+  }
+  sd.renderer = null;
+  sd.controls = null;
+  c.sceneData = sd;
+  c.renderer = null;
+  c.state = 'snapshotted';
+  liveContexts.delete(idx);
+}
+
+function restoreContext(idx) {
+  const c = cells[idx];
+  const sd = c.sceneData;
+  if (!sd || !sd.scene) return;
+
+  ensureContextSlot();
+
+  const wrap = document.getElementById(`wrap-${idx}`);
+  const renderer = createRenderer(wrap);
+  const controls = createControls(sd.camera, renderer.domElement);
+
+  // Copy orbit target from saved state
+  if (sd.savedTarget) controls.target.copy(sd.savedTarget);
+  controls.update();
+
+  sd.renderer = renderer;
+  sd.controls = controls;
+  sd.lastRendered = Date.now();
+  c.renderer = renderer;
+  c.state = 'ready';
+  liveContexts.set(idx, sd);
+
+  // Remove snapshot img once live canvas paints
+  requestAnimationFrame(() => {
+    if (c.snapshot && c.snapshot.parentNode) {
+      c.snapshot.parentNode.removeChild(c.snapshot);
+    }
+  });
+}
+
+// --- Scene creation helpers ---
+function createRenderer(wrap) {
+  const r = new THREE.WebGLRenderer({
+    antialias: false,              // skip AA for perf in grid view
+    alpha: false,
+    powerPreference: 'default',
+    preserveDrawingBuffer: true    // needed for toDataURL snapshots
+  });
+  r.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+  r.setSize(wrap.clientWidth, wrap.clientHeight);
+  r.toneMapping = THREE.ACESFilmicToneMapping;
+  r.toneMappingExposure = 1;
+  r.outputEncoding = THREE.sRGBEncoding;
+  wrap.appendChild(r.domElement);
+  return r;
+}
+
+function createControls(camera, domElement) {
+  const c = new OrbitControls(camera, domElement);
+  c.autoRotate = true;
+  c.autoRotateSpeed = 0.5;
+  c.enableDamping = true;
+  c.dampingFactor = 0.05;
+  c.minDistance = 20;
+  c.maxDistance = 2000;
+  c.addEventListener('start', () => { c.autoRotate = false; });
+  return c;
+}
+
+function buildEnvTexture(renderer) {
+  if (sharedEnvTexture) return sharedEnvTexture;
+  const env = new RoomEnvironment();
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  sharedEnvTexture = pmrem.fromScene(env).texture;
+  pmrem.dispose();
+  return sharedEnvTexture;
+}
+
+function fitCamera(object, camera, controls) {
+  const box = new THREE.Box3().setFromObject(object);
+  const center = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z) || 1;
+  const distance = Math.max(maxDim * 1.6, 120);
+  controls.target.copy(center);
+  camera.position.set(
+    center.x + distance * 0.5,
+    center.y + distance * 0.6,
+    center.z + distance * 0.5
+  );
+  controls.minDistance = maxDim * 0.4;
+  controls.maxDistance = distance * 2.5;
+  controls.update();
+}
+
+// --- Main load routine ---
+async function startLoad(idx) {
+  const c = cells[idx];
+  c.state = 'loading';
+  loadingCount++;
+
+  const wrap = document.getElementById(`wrap-${idx}`);
+  const loadingEl = document.getElementById(`loading-${idx}`);
+  const progressBar = document.getElementById(`progress-${idx}`);
+  loadingEl.classList.remove('hidden');
+  progressBar.style.width = '0%';
+
+  ensureContextSlot();
+
+  const renderer = createRenderer(wrap);
+  const camera = new THREE.PerspectiveCamera(45, wrap.clientWidth / wrap.clientHeight, 1, 5000);
+  camera.position.set(0, 100, 0);
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(sceneBg);
+  scene.environment = buildEnvTexture(renderer);
+
+  const controls = createControls(camera, renderer.domElement);
+
+  const sd = {
+    renderer, camera, scene, controls,
+    modelReady: false,
+    lastRendered: Date.now(),
+    savedTarget: null
+  };
+  liveContexts.set(idx, sd);
+  c.sceneData = sd;
+  c.renderer = renderer;
+
+  const resizeObs = new ResizeObserver(() => {
+    const r = sd.renderer;
+    if (!r) return;
+    const w = wrap.clientWidth;
+    const h = wrap.clientHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    r.setSize(w, h);
+  });
+  resizeObs.observe(wrap);
+  sd.resizeObs = resizeObs;
+
+  try {
+    if (c.mesh.type === 'gltf') {
+      await loadGLTF(c, sd, loadingEl, progressBar);
+    } else {
+      await loadOBJ(c, sd, loadingEl, progressBar);
+    }
+  } catch (err) {
+    console.warn(`Failed to load ${c.mesh.name}:`, err);
+    loadingEl.innerHTML = '<div class="mesh-error">Failed to load mesh</div>';
+  }
+
+  loadingCount--;
+  drainQueue();
+}
+
+function loadGLTF(c, sd, loadingEl, progressBar) {
+  return new Promise((resolve, reject) => {
+    const loader = new GLTFLoader().setPath(c.mesh.path);
+    try {
+      const ktx2 = new KTX2Loader()
+        .setTranscoderPath('js/libs/basis/')
+        .detectSupport(sd.renderer);
+      loader.setKTX2Loader(ktx2);
+    } catch (e) {}
+
+    loader.load(c.mesh.file, (gltf) => {
+      gltf.scene.position.y = 8;
+      sd.scene.add(gltf.scene);
+      fitCamera(gltf.scene, sd.camera, sd.controls);
+      sd.savedTarget = sd.controls.target.clone();
+      sd.modelReady = true;
+      sd.lastRendered = Date.now();
+      loadingEl.classList.add('hidden');
+      c.state = 'ready';
+      resolve();
+    }, (xhr) => {
+      if (xhr.lengthComputable && xhr.total > 0)
+        progressBar.style.width = Math.round((xhr.loaded / xhr.total) * 100) + '%';
+    }, reject);
+  });
+}
+
+function loadOBJ(c, sd, loadingEl, progressBar) {
+  return new Promise((resolve, reject) => {
+    Promise.all([
+      import('./jsm/loaders/MTLLoader.js'),
+      import('./jsm/loaders/OBJLoader.js')
+    ]).then(([{ MTLLoader }, { OBJLoader }]) => {
+      const mtlLoader = new MTLLoader().setPath(c.mesh.path);
+      mtlLoader.load('Mesh.mtl', (materials) => {
+        materials.preload();
+        const objLoader = new OBJLoader().setPath(c.mesh.path).setMaterials(materials);
+        objLoader.load(c.mesh.file + '.obj', (object) => {
+          sd.scene.add(object);
+          fitCamera(object, sd.camera, sd.controls);
+          sd.savedTarget = sd.controls.target.clone();
+          sd.modelReady = true;
+          sd.lastRendered = Date.now();
+          loadingEl.classList.add('hidden');
+          c.state = 'ready';
+          resolve();
+        }, (xhr) => {
+          if (xhr.lengthComputable && xhr.total > 0)
+            progressBar.style.width = Math.round((xhr.loaded / xhr.total) * 100) + '%';
+        }, reject);
+      }, undefined, reject);
+    });
+  });
+}
+</script>
+</body>
+</html>
