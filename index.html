@@ -332,15 +332,31 @@
         if (!isLDControlActive()) return false;
         const flagKey = CATEGORY_TO_FLAG[categoryName];
         if (!flagKey) return false;
+        const flagVal = ldFlags[flagKey];
+        if (flagVal && typeof flagVal === "object" && flagVal.pages) {
+          return Object.values(flagVal.pages).every(function (v) { return v === false; });
+        }
         return ldFlag(flagKey) === false;
+      }
+
+      function isPageEnabledByLD(file) {
+        if (!isLDControlActive()) return true;
+        for (var flagKey in FLAG_TO_CATEGORY) {
+          var catName = FLAG_TO_CATEGORY[flagKey];
+          if (categoryFiles[catName] && categoryFiles[catName].indexOf(file) !== -1) {
+            var flagVal = ldFlags[flagKey];
+            if (flagVal && typeof flagVal === "object" && flagVal.pages) {
+              return flagVal.pages[file] !== false;
+            }
+            return ldFlag(flagKey) !== false;
+          }
+        }
+        return true;
       }
 
       function isFileInDisabledCategory(file, files) {
         if (!isLDControlActive()) return false;
-        for (const cat in files) {
-          if (isCategoryDisabledByLD(cat) && files[cat].includes(file)) return true;
-        }
-        return false;
+        return !isPageEnabledByLD(file);
       }
 
       function ldTrack(eventKey, data, metricValue) {
@@ -428,11 +444,14 @@
 
         if (isLDControlActive()) {
           for (const [flagKey, catName] of Object.entries(FLAG_TO_CATEGORY)) {
-            const val = ldFlag(flagKey);
-            if (val === false) {
-              categorySettings[catName] = false;
-            } else if (val === true) {
-              categorySettings[catName] = true;
+            const flagVal = ldFlags[flagKey];
+            if (flagVal && typeof flagVal === "object" && flagVal.pages) {
+              const anyEnabled = Object.values(flagVal.pages).some(function (v) { return v !== false; });
+              categorySettings[catName] = anyEnabled;
+            } else {
+              const val = ldFlag(flagKey);
+              if (val === false) categorySettings[catName] = false;
+              else if (val === true) categorySettings[catName] = true;
             }
           }
         }
@@ -452,6 +471,19 @@
             el = el.nextElementSibling;
           }
         });
+
+        if (isLDControlActive()) {
+          for (const [flagKey] of Object.entries(FLAG_TO_CATEGORY)) {
+            const flagVal = ldFlags[flagKey];
+            if (flagVal && typeof flagVal === "object" && flagVal.pages) {
+              for (const pageFile in flagVal.pages) {
+                if (flagVal.pages[pageFile] === false && links[pageFile]) {
+                  links[pageFile].classList.add("settings-hidden");
+                }
+              }
+            }
+          }
+        }
 
         document.querySelectorAll(".collapsed-pill").forEach(function (pill) {
           const cat = pill.getAttribute("data-category");
@@ -744,6 +776,7 @@
           collapsedFlyoutTitle.textContent = cat;
           collapsedFlyoutList.innerHTML = "";
           filesInCat.forEach(function (file) {
+            if (!isPageEnabledByLD(file)) return;
             const a = document.createElement("a");
             a.href = "examples/" + file + ".html";
             a.target = "viewer";

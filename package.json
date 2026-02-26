@@ -6,6 +6,7 @@
     "dev": "npx serve -l 3000",
     "build:keys": "node scripts/build-keys.js",
     "build:ld": "npx esbuild scripts/ld-entry.js --bundle --format=iife --outfile=files/ld-bundle.js --minify",
+    "ld:convert": "node scripts/ld-convert-to-json-flags.js",
     "build": "npm run build:keys && npm run build:ld"
   },
   "devDependencies": {
