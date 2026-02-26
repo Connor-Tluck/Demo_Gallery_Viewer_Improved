@@ -361,7 +361,14 @@
 
       function ldTrack(eventKey, data, metricValue) {
         if (ldClient && ldConnected) {
-          try { ldClient.track(eventKey, data, metricValue); } catch (e) {}
+          try {
+            ldClient.track(eventKey, data, metricValue);
+            if (eventKey === "mesh-load-time") console.log("[LD Track] mesh-load-time sent:", metricValue + "ms", data);
+          } catch (e) {
+            if (eventKey === "mesh-load-time") console.warn("[LD Track] mesh-load-time failed:", e);
+          }
+        } else if (eventKey === "mesh-load-time") {
+          console.warn("[LD Track] mesh-load-time NOT sent — LaunchDarkly not connected", data);
         }
       }
 
@@ -678,16 +685,21 @@
             }
           }
           if (e.data && e.data.type === "meshLoadTime") {
+            var clickToRenderMs = e.data.loadTimeMs;
             if (_meshTimer && !_meshTimer.reported) {
+              clickToRenderMs = Date.now() - _meshTimer.start;
               _meshTimer.reported = true;
               if (_meshObserver) { _meshObserver.disconnect(); _meshObserver = null; }
             }
+            console.log("[Mesh Load Time]", e.data.meshId || e.data.mesh,
+              clickToRenderMs + "ms (click-to-render)",
+              _meshTimer ? "(iframe reported " + e.data.loadTimeMs + "ms)" : "(no parent timer)");
             ldTrack("mesh-load-time", {
               mesh: e.data.mesh,
               meshId: e.data.meshId,
               meshType: e.data.meshType,
-              loadTimeMs: e.data.loadTimeMs
-            }, e.data.loadTimeMs);
+              loadTimeMs: clickToRenderMs
+            }, clickToRenderMs);
           }
         });
 
@@ -708,6 +720,7 @@
                 if (!tracker.reported) {
                   tracker.reported = true;
                   var elapsed = Date.now() - tracker.start;
+                  console.log("[Mesh Load Time] (fallback observer)", tracker.file, elapsed + "ms (click-to-render)");
                   ldTrack("mesh-load-time", {
                     meshId: tracker.file,
                     loadTimeMs: elapsed,
@@ -1111,6 +1124,7 @@
         _meshTimer = /^(obj_gltf_mesh|obj_mesh|nearmap_collada)/.test(file)
           ? { file: file, start: Date.now(), reported: false }
           : null;
+        if (_meshTimer) console.log("[Mesh Load Time] Timer started for", file);
 
         if (selected !== null) links[selected].classList.remove("selected");
 
